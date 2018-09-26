@@ -1,0 +1,7 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    <bean id="manager" class="edu.mcw.rgd.QC">
+        <property name="version" value="--Data QC pipeline -- ver. 1.0 -- July 20, 2018 --" />
+    </bean>
+</beans>
