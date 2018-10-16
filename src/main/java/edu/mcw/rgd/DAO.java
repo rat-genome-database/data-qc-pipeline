@@ -1,10 +1,11 @@
 package edu.mcw.rgd;
 
+import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.XdbIdDAO;
 import edu.mcw.rgd.datamodel.Gene;
-import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
+import edu.mcw.rgd.datamodel.ontology.Annotation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,9 +19,9 @@ import java.util.List;
  */
 public class DAO {
 
-    public static final int XDB_KEY_GTEX = 65;
-    XdbIdDAO xdao = new XdbIdDAO();
+    AnnotationDAO adao = new AnnotationDAO();
     GeneDAO gdao = new GeneDAO();
+    XdbIdDAO xdao = new XdbIdDAO();
 
     Log logInserted = LogFactory.getLog("insertedIds");
 
@@ -28,12 +29,14 @@ public class DAO {
         System.out.println(xdao.getConnectionInfo());
     }
 
-    public List<XdbId> getGTExXdbIds(String srcPipeline) throws Exception {
+    public List<Annotation> getAnnotationsWithNewLinesInNotes() throws Exception {
 
-        XdbId filter = new XdbId();
-        filter.setXdbKey(XDB_KEY_GTEX);
-        filter.setSrcPipeline(srcPipeline);
-        return xdao.getXdbIds(filter, SpeciesType.HUMAN);
+        String sql = "SELECT * FROM full_annot WHERE dbms_lob.instr(notes,CHR(10))>0";
+        return adao.executeAnnotationQuery(sql);
+    }
+
+    public void updateAnnotation(Annotation annot) throws Exception {
+        adao.updateAnnotation(annot);
     }
 
     /**

@@ -1,7 +1,5 @@
+v.1.1, 2018-10-16
+-added fixing of annotations with new lines in notes
+
 v 1.0, 2017-07-20
 -initial version of the pipeline: QC of dangling sequence objects
-
-
-LOGIC:
-  determine active sequence objects in RGD_IDS that do not have corresponding entries
-  in tables RGD_SEQ_RGD_ID and SEQUENCES

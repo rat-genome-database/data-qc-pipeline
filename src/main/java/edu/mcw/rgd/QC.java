@@ -1,10 +1,13 @@
 package edu.mcw.rgd;
 
+import edu.mcw.rgd.datamodel.ontology.Annotation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
+
+import java.util.List;
 
 /**
  * @author mtutaj
@@ -25,15 +28,41 @@ public class QC {
         System.out.println(manager.getVersion());
 
         try {
-            manager.run();
+            manager.run(args);
         }catch (Exception e) {
             manager.log.error(e);
             throw e;
         }
     }
 
-    public void run() throws Exception {
+    public void run(String[] args) throws Exception {
 
+        qcNewLinesInAnnotNotes();
+        qcOrphanedSequenceRgdIds();
+    }
+
+    void qcNewLinesInAnnotNotes() throws Exception {
+
+        List<Annotation> annots = dao.getAnnotationsWithNewLinesInNotes();
+        for( Annotation a: annots ) {
+            String oldNotes = a.getNotes();
+            int oldLen = oldNotes.length();
+            String newNotes = a.getNotes().replaceAll("[\\s]+", " ").trim();
+            a.setNotes(newNotes);
+            int newLen = newNotes.length();
+            System.out.println("\r\nOLD ["+oldNotes+"]\r\nNEW ["+newNotes+"]");
+            if( newLen < oldLen-2 ) {
+                System.out.println("  big deletion");
+            }
+            dao.updateAnnotation(a);
+        }
+        System.out.println();
+        System.out.println("ANNOTATIONS WITH NEW LINES IN NOTES, FIXED: " +annots.size());
+    }
+
+    void qcOrphanedSequenceRgdIds() throws Exception {
+
+        System.out.println();
         int count = dao.getCountOfOrphanedSequenceRgdIds();
         System.out.println(" ORPHANED SEQUENCE RGD IDS: "+count);
         /*
