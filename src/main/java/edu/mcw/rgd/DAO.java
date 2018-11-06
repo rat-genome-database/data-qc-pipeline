@@ -23,7 +23,7 @@ public class DAO {
     GeneDAO gdao = new GeneDAO();
     XdbIdDAO xdao = new XdbIdDAO();
 
-    Log logInserted = LogFactory.getLog("insertedIds");
+    Log logUpdatedAnnots = LogFactory.getLog("updatedAnnots");
 
     public DAO() {
         System.out.println(xdao.getConnectionInfo());
@@ -36,6 +36,7 @@ public class DAO {
     }
 
     public void updateAnnotation(Annotation annot) throws Exception {
+        logUpdatedAnnots.debug(annot.dump("|"));
         adao.updateAnnotation(annot);
     }
 
@@ -59,32 +60,10 @@ public class DAO {
         return gdao.getActiveGenes(speciesKey);
     }
 
-    /**
-     * insert a bunch of XdbIds; duplicate entries are not inserted (with same RGD_ID,XDB_KEY,ACC_ID,SRC_PIPELINE)
-     * @param xdbs list of XdbIds objects to be inserted
-     * @return number of actually inserted rows
-     * @throws Exception when unexpected error in spring framework occurs
-     */
-    public int insertXdbs(List<XdbId> xdbs) throws Exception {
-
-        for( XdbId xdbId: xdbs ) {
-            logInserted.debug(xdbId.dump("|"));
-        }
-
-        return xdao.insertXdbs(xdbs);
-    }
-
     public int getCountOfOrphanedSequences() throws Exception {
 
-        String sql = "SELECT COUNT(*) FROM sequences s WHERE NOT EXISTS "
-                +"(SELECT 1 FROM rgd_seq_rgd_id r WHERE s.sequence_key=r.sequence_key)";
-        return gdao.getCount(sql);
-    }
-
-    public int getCountOfOrphanedSequenceRgdIds() throws Exception {
-
-        String sql = "SELECT COUNT(*) FROM rgd_ids r WHERE r.object_key=9 AND object_status='ACTIVE' AND NOT EXISTS "
-                +"(SELECT 1 FROM sequences s WHERE s.rgd_id=r.rgd_id)";
+        String sql = "SELECT COUNT(*) FROM seq_data WHERE NOT EXISTS "
+                +"(SELECT 1 FROM rgd_sequences r WHERE data_md5=seq_data_md5)";
         return gdao.getCount(sql);
     }
 }

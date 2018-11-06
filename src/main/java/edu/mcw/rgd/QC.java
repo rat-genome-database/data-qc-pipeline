@@ -63,15 +63,7 @@ public class QC {
     void qcOrphanedSequenceRgdIds() throws Exception {
 
         System.out.println();
-        int count = dao.getCountOfOrphanedSequenceRgdIds();
-        System.out.println(" ORPHANED SEQUENCE RGD IDS: "+count);
-        /*
-        UPDATE rgd_ids r SET last_modified_date=SYSDATE,object_status='WITHDRAWN'
-        WHERE r.object_key=9 AND object_status='ACTIVE' AND NOT EXISTS
-                (SELECT 1 FROM sequences s WHERE s.rgd_id=r.rgd_id)
-        */
-
-        count = dao.getCountOfOrphanedSequences();
+        int count = dao.getCountOfOrphanedSequences();
         System.out.println(" ORPHANED SEQUENCES: "+count);
     }
 
