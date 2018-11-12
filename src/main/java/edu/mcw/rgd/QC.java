@@ -37,8 +37,35 @@ public class QC {
 
     public void run(String[] args) throws Exception {
 
-        qcNewLinesInAnnotNotes();
-        qcOrphanedSequenceRgdIds();
+        boolean qcAnnotations = false;
+        boolean qcSequences = false;
+
+        // no arguments means to run all qc types
+        if( args.length==0 ) {
+            qcAnnotations = qcSequences = true;
+        } else {
+            for (String arg : args) {
+                switch (arg) {
+                    case "--all":
+                        qcAnnotations = qcSequences = true;
+                        break;
+                    case "--anotations":
+                        qcAnnotations = true;
+                        break;
+                    case "--sequences":
+                        qcSequences = true;
+                        break;
+                }
+            }
+        }
+
+        if( qcAnnotations ) {
+            qcNewLinesInAnnotNotes();
+        }
+
+        if( qcSequences ) {
+            qcSequences();
+        }
     }
 
     void qcNewLinesInAnnotNotes() throws Exception {
@@ -60,11 +87,22 @@ public class QC {
         System.out.println("ANNOTATIONS WITH NEW LINES IN NOTES, FIXED: " +annots.size());
     }
 
-    void qcOrphanedSequenceRgdIds() throws Exception {
+    void qcSequences() throws Exception {
 
         System.out.println();
         int count = dao.getCountOfOrphanedSequences();
-        System.out.println(" ORPHANED SEQUENCES: "+count);
+        System.out.println("ORPHANED SEQUENCES: "+count);
+
+        System.out.println();
+        List<Integer> rgdIds = dao.getRgdIdsWithMultipleSequences("uniprot_seq");
+        if( rgdIds.isEmpty() ) {
+            System.out.println("NO RGD IDS WITH MULTIPLE uniprot_seq SEQUENCES");
+        } else {
+            System.out.println(+rgdIds.size()+" RGD IDS WITH MULTIPLE uniprot_seq SEQUENCES");
+            for( Integer rgdId: rgdIds ) {
+                System.out.println("    "+rgdId);
+            }
+        }
     }
 
     public void setVersion(String version) {

@@ -1,9 +1,8 @@
 package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.impl.AnnotationDAO;
-import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.XdbIdDAO;
-import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import org.apache.commons.logging.Log;
@@ -20,13 +19,12 @@ import java.util.List;
 public class DAO {
 
     AnnotationDAO adao = new AnnotationDAO();
-    GeneDAO gdao = new GeneDAO();
     XdbIdDAO xdao = new XdbIdDAO();
 
     Log logUpdatedAnnots = LogFactory.getLog("updatedAnnots");
 
     public DAO() {
-        System.out.println(xdao.getConnectionInfo());
+        System.out.println(adao.getConnectionInfo());
     }
 
     public List<Annotation> getAnnotationsWithNewLinesInNotes() throws Exception {
@@ -51,19 +49,22 @@ public class DAO {
     }
 
     /**
-     * Returns all active genes for given species. Results do not contain splices or alleles
-     * @param speciesKey species type key
-     * @return list of active genes for given species
+     * get list of RGD IDS having multiple sequences of given type per RGD ID
+     * @param seqType sequence type
+     * @return list of rgd ids, possibly empty
      * @throws Exception when unexpected error in spring framework occurs
      */
-    public List<Gene> getActiveGenes(int speciesKey) throws Exception {
-        return gdao.getActiveGenes(speciesKey);
+    public List<Integer> getRgdIdsWithMultipleSequences(String seqType) throws Exception {
+        String sql = "SELECT rgd_id FROM rgd_sequences WHERE seq_type=? "+
+            "GROUP BY rgd_id "+
+            "HAVING COUNT(*)>1";
+        return IntListQuery.execute(adao, sql, seqType);
     }
 
     public int getCountOfOrphanedSequences() throws Exception {
 
         String sql = "SELECT COUNT(*) FROM seq_data WHERE NOT EXISTS "
                 +"(SELECT 1 FROM rgd_sequences r WHERE data_md5=seq_data_md5)";
-        return gdao.getCount(sql);
+        return adao.getCount(sql);
     }
 }
