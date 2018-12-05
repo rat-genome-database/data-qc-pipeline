@@ -44,23 +44,22 @@ public class QC {
 
         // no arguments means to run all qc types
         if( args.length==0 ) {
-            qcAnnotations = qcSequences = true;
-        } else {
-            for (String arg : args) {
-                switch (arg) {
-                    case "--all":
-                        qcAnnotations = qcSequences = qcRsOntology = true;
-                        break;
-                    case "--anotations":
-                        qcAnnotations = true;
-                        break;
-                    case "--rs_ontology":
-                        qcRsOntology = true;
-                        break;
-                    case "--sequences":
-                        qcSequences = true;
-                        break;
-                }
+            args = new String[]{"--all"};
+        }
+        for (String arg : args) {
+            switch (arg) {
+                case "--all":
+                    qcAnnotations = qcSequences = qcRsOntology = true;
+                    break;
+                case "--anotations":
+                    qcAnnotations = true;
+                    break;
+                case "--rs_ontology":
+                    qcRsOntology = true;
+                    break;
+                case "--sequences":
+                    qcSequences = true;
+                    break;
             }
         }
 
