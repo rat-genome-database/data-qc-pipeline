@@ -1,10 +1,11 @@
 package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.impl.AnnotationDAO;
-import edu.mcw.rgd.dao.impl.XdbIdDAO;
+import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.spring.IntListQuery;
-import edu.mcw.rgd.datamodel.XdbId;
+import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,7 +20,7 @@ import java.util.List;
 public class DAO {
 
     AnnotationDAO adao = new AnnotationDAO();
-    XdbIdDAO xdao = new XdbIdDAO();
+    OntologyXDAO odao = new OntologyXDAO();
 
     Log logUpdatedAnnots = LogFactory.getLog("updatedAnnots");
 
@@ -38,14 +39,11 @@ public class DAO {
         adao.updateAnnotation(annot);
     }
 
-    /**
-     * return external ids for given xdb key and rgd-id
-     * @param xdbKey - external database key (like 2 for PubMed)
-     * @param rgdId - rgd-id
-     * @return list of external ids
-     */
-    public List<XdbId> getXdbIdsByRgdId(int xdbKey, int rgdId) throws Exception {
-        return xdao.getXdbIdsByRgdId(xdbKey, rgdId);
+    public List<TermSynonym> getMalformedRsSynonyms() throws Exception {
+        String sql = "SELECT * FROM ont_synonyms WHERE term_acc LIKE 'RS%' AND synonym_name LIKE '%RGD%ID%'\n" +
+                " AND NOT regexp_like(synonym_name, '^RGD ID: [0-9]+$')";
+        TermSynonymQuery q = new TermSynonymQuery(odao.getDataSource(), sql);
+        return odao.execute(q);
     }
 
     /**

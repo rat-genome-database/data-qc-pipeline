@@ -1,6 +1,7 @@
 package edu.mcw.rgd;
 
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -38,6 +39,7 @@ public class QC {
     public void run(String[] args) throws Exception {
 
         boolean qcAnnotations = false;
+        boolean qcRsOntology = false;
         boolean qcSequences = false;
 
         // no arguments means to run all qc types
@@ -47,10 +49,13 @@ public class QC {
             for (String arg : args) {
                 switch (arg) {
                     case "--all":
-                        qcAnnotations = qcSequences = true;
+                        qcAnnotations = qcSequences = qcRsOntology = true;
                         break;
                     case "--anotations":
                         qcAnnotations = true;
+                        break;
+                    case "--rs_ontology":
+                        qcRsOntology = true;
                         break;
                     case "--sequences":
                         qcSequences = true;
@@ -61,6 +66,10 @@ public class QC {
 
         if( qcAnnotations ) {
             qcNewLinesInAnnotNotes();
+        }
+
+        if( qcRsOntology ) {
+            qcRsOntology();
         }
 
         if( qcSequences ) {
@@ -85,6 +94,23 @@ public class QC {
         }
         System.out.println();
         System.out.println("ANNOTATIONS WITH NEW LINES IN NOTES, FIXED: " +annots.size());
+    }
+
+    /**
+     * RS ontology must have 'RGD ID:' synonyms properly formatted in order to be properly associated with a strain object
+     * @throws Exception
+     */
+    void qcRsOntology() throws Exception {
+
+        List<TermSynonym> malformedRsSynonyms = dao.getMalformedRsSynonyms();
+        System.out.println();
+        System.out.println("MALFORMED RS SYNONYMS: "+malformedRsSynonyms.size());
+        if( !malformedRsSynonyms.isEmpty() ) {
+            System.out.println();
+            for( TermSynonym ts: malformedRsSynonyms ) {
+                System.out.println("TERM_ACC:"+ts.getTermAcc()+"  SYN: ["+ts.getName()+"]");
+            }
+        }
     }
 
     void qcSequences() throws Exception {

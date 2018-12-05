@@ -1,3 +1,6 @@
+v.1.2.2, 2018-12-05
+-ontology QC: added checking if 'RGD ID:' synonyms for RS ontology are properly formatted
+
 v.1.2.1, 2018-11-12
 -sequence QC: added listing of protein rgd ids having multiple sequences of type 'uniprot_seq'
 
