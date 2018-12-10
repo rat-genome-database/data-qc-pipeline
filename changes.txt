@@ -1,3 +1,6 @@
+v.1.2.3, 2018-12-07
+-annotation QC: added reporting and removal of obsolete ND annotations for GO ontology, per RGDD-1529
+
 v.1.2.2, 2018-12-05
 -ontology QC: added checking if 'RGD ID:' synonyms for RS ontology are properly formatted
 

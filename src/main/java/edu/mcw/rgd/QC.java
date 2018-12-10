@@ -2,12 +2,12 @@ package edu.mcw.rgd;
 
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +19,7 @@ public class QC {
     private DAO dao = new DAO();
     private String version;
 
-    Log log = LogFactory.getLog("core");
+    Logger log = Logger.getLogger("core");
 
     public static void main(String[] args) throws Exception {
 
@@ -51,7 +51,7 @@ public class QC {
                 case "--all":
                     qcAnnotations = qcSequences = qcRsOntology = true;
                     break;
-                case "--anotations":
+                case "--annotations":
                     qcAnnotations = true;
                     break;
                 case "--rs_ontology":
@@ -64,6 +64,7 @@ public class QC {
         }
 
         if( qcAnnotations ) {
+            qcNDAnnotations();
             qcNewLinesInAnnotNotes();
         }
 
@@ -93,6 +94,41 @@ public class QC {
         }
         System.out.println();
         System.out.println("ANNOTATIONS WITH NEW LINES IN NOTES, FIXED: " +annots.size());
+    }
+
+    void qcNDAnnotations() throws Exception {
+
+        // GO BP
+        qcNDAnnotations("BP", "P");
+        // GO CC
+        qcNDAnnotations("CC", "C");
+        // GO MF
+        qcNDAnnotations("MF", "F");
+    }
+
+    void qcNDAnnotations(String ontologyId, String aspect) throws Exception {
+
+        System.out.println();
+
+        List<Annotation> ndAnnots = dao.getNDAnnotationsForRootTerm(ontologyId);
+        System.out.println("QC ND annotations for "+ontologyId+" ontology (aspect "+aspect+") : "+ndAnnots.size());
+
+        List<Annotation> ndAnnotsForDelete = new ArrayList<>();
+        for( Annotation ndAnnot: ndAnnots ) {
+            int rgdId = ndAnnot.getAnnotatedObjectRgdId();
+            List<Annotation> manualAnnots = dao.getRgdManualAnnotations(rgdId, aspect);
+            if( !manualAnnots.isEmpty() ) {
+                System.out.println("  "+manualAnnots.size() + " RGD:"+rgdId);
+                ndAnnotsForDelete.add(ndAnnot);
+            }
+        }
+
+        if( ndAnnotsForDelete.isEmpty() ) {
+            System.out.println("  all ND annotations for " + ontologyId + " ontology (aspect " + aspect + ") are valid");
+        } else {
+            dao.deleteNDAnnotations(ndAnnotsForDelete);
+            System.out.println("  "+ ndAnnotsForDelete.size() + " ND annotations for " + ontologyId + " ontology (aspect " + aspect + ") have been deleted");
+        }
     }
 
     /**

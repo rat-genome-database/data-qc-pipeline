@@ -2,14 +2,16 @@ package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
+import edu.mcw.rgd.datamodel.EvidenceCode;
+import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * @author mtutaj
@@ -22,7 +24,8 @@ public class DAO {
     AnnotationDAO adao = new AnnotationDAO();
     OntologyXDAO odao = new OntologyXDAO();
 
-    Log logUpdatedAnnots = LogFactory.getLog("updatedAnnots");
+    Logger logUpdatedAnnots = Logger.getLogger("updatedAnnots");
+    Logger logDeletedNDAnnots = Logger.getLogger("deleted_ND_annots");
 
     public DAO() {
         System.out.println(adao.getConnectionInfo());
@@ -37,6 +40,68 @@ public class DAO {
     public void updateAnnotation(Annotation annot) throws Exception {
         logUpdatedAnnots.debug(annot.dump("|"));
         adao.updateAnnotation(annot);
+    }
+
+    public void deleteNDAnnotations(List<Annotation> ndAnnots) throws Exception {
+        List<Integer> keys = new ArrayList<>(ndAnnots.size());
+        for( Annotation a: ndAnnots ) {
+            logDeletedNDAnnots.info(a.dump("|"));
+            keys.add(a.getKey());
+        }
+        adao.deleteAnnotations(keys);
+    }
+
+    Set<String> getManualEvidenceCodes() throws Exception {
+        if( _manualEvidenceCodes!=null ) {
+            return _manualEvidenceCodes;
+        }
+
+        String sql = "SELECT * FROM evidence_codes";
+        EvidenceQuery q = new EvidenceQuery(adao.getDataSource(), sql);
+        q.compile();
+        _manualEvidenceCodes = new HashSet<>();
+        for( Evidence ev: (List<Evidence>)q.execute()) {
+            String evCode = ev.getEvidence();
+            if( EvidenceCode.isManualInSameSpecies(evCode) ) {
+                _manualEvidenceCodes.add(evCode);
+            }
+        }
+        return _manualEvidenceCodes;
+    }
+    static Set<String> _manualEvidenceCodes = null;
+
+
+    public List<Annotation> getNDAnnotationsForRootTerm(String ontId) throws Exception {
+        String rootTermAcc = odao.getRootTerm(ontId);
+
+        List<Annotation> annots = adao.getAnnotations(rootTermAcc);
+        Iterator<Annotation> it = annots.iterator();
+        while( it.hasNext() ) {
+            Annotation a = it.next();
+            if( !a.getEvidence().equals("ND") ) {
+                it.remove();
+            }
+        }
+        return annots;
+    }
+
+    public List<Annotation> getRgdManualAnnotations(int rgdId, String aspect) throws Exception {
+
+        Set<String> manualEvidenceCodes = getManualEvidenceCodes();
+
+        List<Annotation> annots = adao.getAnnotationsByAspect(rgdId, aspect);
+        Iterator<Annotation> it = annots.iterator();
+        while( it.hasNext() ) {
+            Annotation a = it.next();
+            if( !manualEvidenceCodes.contains(a.getEvidence()) ) {
+                it.remove();
+                continue;
+            }
+            if( !a.getDataSrc().equals("RGD") ) {
+                it.remove();
+            }
+        }
+        return annots;
     }
 
     public List<TermSynonym> getMalformedRsSynonyms() throws Exception {
