@@ -5,9 +5,12 @@
 . /etc/profile
 APPNAME=DataQCPipeline
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
+
 EMAIL_LIST=mtutaj@mcw.edu
+MMO_EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
     EMAIL_LIST=mtutaj@mcw.edu,slaulede@mcw.edu
+    MMO_EMAIL_LIST=mtutaj@mcw.edu,jrsmith@mcw.edu
 fi
 
 APPDIR=/home/rgddata/pipelines/$APPNAME
@@ -24,7 +27,7 @@ fi
 
 # if there are any annotations with MMO issues in the notes, email them
 if [ -s logs/annots_with_MMO_issues.log ]; then
-  mailx -s "[$SERVER] annotations with MMO issues" mtutaj@mcw.edu,jrsmith@mcw.edu < logs/annots_with_MMO_issues.log
+  mailx -s "[$SERVER] annotations with MMO issues" $MMO_EMAIL_LIST < logs/annots_with_MMO_issues.log
 fi
 
 
