@@ -21,3 +21,10 @@ mailx -s "[$SERVER] Data QC Pipeline OK" $EMAIL_LIST < run.log
 if [ -s logs/deleted_ND_annots.log ]; then
   mailx -s "[$SERVER] deleted ND annotations" $EMAIL_LIST < logs/deleted_ND_annots.log
 fi
+
+# if there are any annotations with MMO issues in the notes, email them
+if [ -s logs/annots_with_MMO_issues.log ]; then
+  mailx -s "[$SERVER] annotations with MMO issues" mtutaj@mcw.edu,jrsmith@mcw.edu < logs/annots_with_MMO_issues.log
+fi
+
+

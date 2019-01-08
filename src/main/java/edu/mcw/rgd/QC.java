@@ -93,6 +93,8 @@ public class QC {
 
     int qcAnnotationsWithMmoNotes(int speciesTypeKey) throws Exception {
 
+        Logger logMMO = Logger.getLogger("annots_with_MMO_issues");
+
         int issueCount = 0;
         List<Annotation> annots = dao.getRgdManualAnnotationsWithMmoNotes(speciesTypeKey);
         for( Annotation a: annots ) {
@@ -101,7 +103,7 @@ public class QC {
             while( mmoTermPos>=0 ) {
                 // see if MMO term matches MMO:xxxxxxx
                 if( mmoTermPos+11 > a.getNotes().length() ) {
-                    System.out.println("  truncated MMO id for annotation with key="+a.getKey());
+                    logMMO.info("  truncated MMO id for annotation with key="+a.getKey());
                     issueCount++;
                     break;
                 }
@@ -109,10 +111,10 @@ public class QC {
                 String mmoTermAcc = notes.substring(mmoTermPos, mmoTermPos+11);
                 Term t = dao.getTerm(mmoTermAcc);
                 if( t==null ) {
-                    System.out.println("  invalid MMO term acc "+mmoTermAcc+" for annotation with key="+a.getKey());
+                    logMMO.info("  invalid MMO term acc "+mmoTermAcc+" for annotation with key="+a.getKey());
                     issueCount++;
                 } else if( t.isObsolete() ) {
-                    System.out.println("  inactive MMO term acc "+mmoTermAcc+" for annotation with key="+a.getKey());
+                    logMMO.info("  inactive MMO term acc "+mmoTermAcc+" for annotation with key="+a.getKey());
                     issueCount++;
                 }
 
