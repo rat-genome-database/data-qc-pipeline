@@ -1,6 +1,8 @@
 package edu.mcw.rgd;
 
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -64,6 +66,7 @@ public class QC {
         }
 
         if( qcAnnotations ) {
+            qcAnnotationsWithMmoNotes();
             qcNDAnnotations();
             qcNewLinesInAnnotNotes();
         }
@@ -75,6 +78,49 @@ public class QC {
         if( qcSequences ) {
             qcSequences();
         }
+    }
+
+    void qcAnnotationsWithMmoNotes() throws Exception {
+
+        int issueCount = 0;
+        issueCount += qcAnnotationsWithMmoNotes(SpeciesType.HUMAN);
+        issueCount += qcAnnotationsWithMmoNotes(SpeciesType.MOUSE);
+        issueCount += qcAnnotationsWithMmoNotes(SpeciesType.RAT);
+
+        System.out.println();
+        System.out.println("CC manual annotations with problematic MMO notes: "+issueCount);
+    }
+
+    int qcAnnotationsWithMmoNotes(int speciesTypeKey) throws Exception {
+
+        int issueCount = 0;
+        List<Annotation> annots = dao.getRgdManualAnnotationsWithMmoNotes(speciesTypeKey);
+        for( Annotation a: annots ) {
+            String notes = a.getNotes();
+            int mmoTermPos = notes.indexOf("MMO:");
+            while( mmoTermPos>=0 ) {
+                // see if MMO term matches MMO:xxxxxxx
+                if( mmoTermPos+11 > a.getNotes().length() ) {
+                    System.out.println("  truncated MMO id for annotation with key="+a.getKey());
+                    issueCount++;
+                    break;
+                }
+                // see if MMO term is active
+                String mmoTermAcc = notes.substring(mmoTermPos, mmoTermPos+11);
+                Term t = dao.getTerm(mmoTermAcc);
+                if( t==null ) {
+                    System.out.println("  invalid MMO term acc "+mmoTermAcc+" for annotation with key="+a.getKey());
+                    issueCount++;
+                } else if( t.isObsolete() ) {
+                    System.out.println("  inactive MMO term acc "+mmoTermAcc+" for annotation with key="+a.getKey());
+                    issueCount++;
+                }
+
+                // go to next MMO: term acc
+                mmoTermPos = notes.indexOf("MMO:", mmoTermPos+11);
+            }
+        }
+        return issueCount;
     }
 
     void qcNewLinesInAnnotNotes() throws Exception {

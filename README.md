@@ -5,6 +5,10 @@ General purpose qc reports on data integrity.
 
 1. ANNOTATIONS
     1. FULL_ANNOT.NOTES: new lines are not allowed: must be replaced with a single space
+    2. removal of obsolete ND annotations, per RGDD-1529:
+       if an object has an ND annotation, it cannot have any manual RGD annotations;
+       but if it has some, ND annotation must be removed
+    3. report all manual CC annotations that have invalid MMO term accession in the NOTES field
 
 2. ONTOLOGIES
     1. Synonyms for RS ontology that contain text 'RGD ID' are checked if the RGD ID is properly formatted

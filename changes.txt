@@ -1,3 +1,6 @@
+v.1.2.4, 2019-01-08
+-annotation QC: added reporting of CC manual annotations that have invalid MMO: ids
+
 v.1.2.3, 2018-12-07
 -annotation QC: added reporting and removal of obsolete ND annotations for GO ontology, per RGDD-1529
 

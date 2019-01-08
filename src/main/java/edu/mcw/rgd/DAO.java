@@ -6,8 +6,10 @@ import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
 import edu.mcw.rgd.datamodel.EvidenceCode;
+import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import org.apache.log4j.Logger;
 
@@ -104,11 +106,47 @@ public class DAO {
         return annots;
     }
 
+    public List<Annotation> getRgdManualAnnotationsWithMmoNotes(int speciesTypeKey) throws Exception {
+
+        List<Annotation> annots = adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, "C", "RGD");
+        Iterator<Annotation> it = annots.iterator();
+
+        while (it.hasNext()) {
+            Annotation a = it.next();
+
+            // handle only GENES
+            if (a.getRgdObjectKey() != RgdId.OBJECT_KEY_GENES) {
+                it.remove();
+                continue;
+            }
+            // process only original annotations - WITH_INFO must be NULL
+            if (a.getWithInfo() != null) {
+                it.remove();
+                continue;
+            }
+            // allowed evidence codes: IDA, IMP, IPI
+            if (!(a.getEvidence().equals("IDA") || a.getEvidence().equals("IMP") || a.getEvidence().equals("IPI"))) {
+                it.remove();
+                continue;
+            }
+            // skip annotations that do not have MMO ids in the notes
+            if (a.getNotes() == null || !a.getNotes().contains("MMO:")) {
+                it.remove();
+                continue;
+            }
+        }
+        return annots;
+    }
+
     public List<TermSynonym> getMalformedRsSynonyms() throws Exception {
         String sql = "SELECT * FROM ont_synonyms WHERE term_acc LIKE 'RS%' AND synonym_name LIKE '%RGD%ID%'\n" +
                 " AND NOT regexp_like(synonym_name, '^RGD ID: [0-9]+$')";
         TermSynonymQuery q = new TermSynonymQuery(odao.getDataSource(), sql);
         return odao.execute(q);
+    }
+
+    public Term getTerm(String termAcc) throws Exception {
+        return odao.getTermWithStatsCached(termAcc);
     }
 
     /**
