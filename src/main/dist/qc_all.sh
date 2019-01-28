@@ -26,8 +26,8 @@ if [ -s logs/deleted_ND_annots_daily.log ]; then
 fi
 
 # if there are any annotations with MMO issues in the notes, email them
-if [ -s logs/annots_with_MMO_issues.log ]; then
-  mailx -s "[$SERVER] annotations with MMO issues" $MMO_EMAIL_LIST < logs/annots_with_MMO_issues.log
+if [ -s logs/annots_with_MMO_issues_daily.log ]; then
+  mailx -s "[$SERVER] annotations with MMO issues" $MMO_EMAIL_LIST < logs/annots_with_MMO_issues_daily.log
 fi
 
 

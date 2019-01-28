@@ -1,3 +1,6 @@
+v.1.2.5, 2019-01-28
+-fixed logging
+
 v.1.2.4, 2019-01-08
 -annotation QC: added reporting of CC manual annotations that have invalid MMO: ids
 
