@@ -21,8 +21,8 @@ $APPDIR/run.sh --all
 mailx -s "[$SERVER] Data QC Pipeline OK" $EMAIL_LIST < run.log
 
 # if there are any ND annotations that have been deleted, email them
-if [ -s logs/deleted_ND_annots.log ]; then
-  mailx -s "[$SERVER] deleted ND annotations" $EMAIL_LIST < logs/deleted_ND_annots.log
+if [ -s logs/deleted_ND_annots_daily.log ]; then
+  mailx -s "[$SERVER] deleted ND annotations" $EMAIL_LIST < logs/deleted_ND_annots_daily.log
 fi
 
 # if there are any annotations with MMO issues in the notes, email them
