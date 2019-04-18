@@ -69,6 +69,7 @@ public class QC {
             qcAnnotationsWithMmoNotes();
             qcNDAnnotations();
             qcNewLinesInAnnotNotes();
+            qcAnnotationsWithInactiveReferences();
         }
 
         if( qcRsOntology ) {
@@ -177,6 +178,16 @@ public class QC {
             dao.deleteNDAnnotations(ndAnnotsForDelete);
             System.out.println("  "+ ndAnnotsForDelete.size() + " ND annotations for " + ontologyId + " ontology (aspect " + aspect + ") have been deleted");
         }
+    }
+
+    void qcAnnotationsWithInactiveReferences() throws Exception {
+
+        System.out.println();
+        List<Annotation> annots = dao.getAnnotationsWithInactiveReferences();
+        for( Annotation a: annots ) {
+            System.out.println("    "+a.dump("|"));
+        }
+        System.out.println("ANNOTATIONS WITH INACTIVE REF_RGD_IDS: " +annots.size());
     }
 
     /**

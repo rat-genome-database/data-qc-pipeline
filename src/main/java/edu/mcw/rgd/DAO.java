@@ -2,6 +2,7 @@ package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.dao.spring.AnnotationQuery;
 import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
@@ -167,5 +168,12 @@ public class DAO {
         String sql = "SELECT COUNT(*) FROM seq_data WHERE NOT EXISTS "
                 +"(SELECT 1 FROM rgd_sequences r WHERE data_md5=seq_data_md5)";
         return adao.getCount(sql);
+    }
+
+    public List<Annotation> getAnnotationsWithInactiveReferences() throws Exception {
+        String sql = "SELECT a.*,r.species_type_key FROM full_annot a,rgd_ids r"+
+            " WHERE annotated_object_rgd_id=rgd_id AND object_status='ACTIVE'"+
+            "  AND EXISTS (SELECT 1 FROM rgd_ids r WHERE ref_rgd_id=rgd_id AND object_status<>'ACTIVE')";
+        return adao.executeAnnotationQuery(sql);
     }
 }
