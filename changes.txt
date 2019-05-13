@@ -1,3 +1,6 @@
+v.1.2.7, 2019-05-13
+-inactive objects QC: added reporting of active qtls with inactive markers
+
 v.1.2.6, 2019-04-18
 -annotation QC: added reporting of annotations with inactive references
 

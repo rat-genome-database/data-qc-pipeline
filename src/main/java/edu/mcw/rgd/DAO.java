@@ -5,6 +5,7 @@ import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.spring.AnnotationQuery;
 import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.dao.spring.IntListQuery;
+import edu.mcw.rgd.dao.spring.IntStringMapQuery;
 import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
 import edu.mcw.rgd.datamodel.EvidenceCode;
 import edu.mcw.rgd.datamodel.RgdId;
@@ -175,5 +176,12 @@ public class DAO {
             " WHERE annotated_object_rgd_id=rgd_id AND object_status='ACTIVE'"+
             "  AND EXISTS (SELECT 1 FROM rgd_ids r WHERE ref_rgd_id=rgd_id AND object_status<>'ACTIVE')";
         return adao.executeAnnotationQuery(sql);
+    }
+
+    public List<IntStringMapQuery.MapPair> getActiveQtlsWithInactiveMarkers() throws Exception {
+        String sql = "SELECT q.rgd_id,q.qtl_symbol FROM qtls q\n" +
+                "WHERE EXISTS(select 1 FROM rgd_ids r where (r.rgd_id=q.peak_rgd_id or r.rgd_id=flank_1_rgd_id or r.rgd_id=flank_2_rgd_id) and r.object_status<>'ACTIVE') \n" +
+                "  AND EXISTS(select 1 from rgd_ids i where i.rgd_id=q.rgd_id and i.object_status='ACTIVE')";
+        return IntStringMapQuery.execute(adao, sql);
     }
 }

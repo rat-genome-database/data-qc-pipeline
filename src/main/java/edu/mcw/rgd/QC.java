@@ -1,5 +1,6 @@
 package edu.mcw.rgd;
 
+import edu.mcw.rgd.dao.spring.IntStringMapQuery;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
@@ -22,6 +23,7 @@ public class QC {
     private String version;
 
     Logger log = Logger.getLogger("core");
+    Logger logQtls = Logger.getLogger("qtls_with_inactive_markers");
 
     public static void main(String[] args) throws Exception {
 
@@ -41,6 +43,7 @@ public class QC {
     public void run(String[] args) throws Exception {
 
         boolean qcAnnotations = false;
+        boolean qcInactiveObjects = false;
         boolean qcRsOntology = false;
         boolean qcSequences = false;
 
@@ -51,10 +54,13 @@ public class QC {
         for (String arg : args) {
             switch (arg) {
                 case "--all":
-                    qcAnnotations = qcSequences = qcRsOntology = true;
+                    qcAnnotations = qcInactiveObjects = qcSequences = qcRsOntology = true;
                     break;
                 case "--annotations":
                     qcAnnotations = true;
+                    break;
+                case "--inactive_objects":
+                    qcInactiveObjects = true;
                     break;
                 case "--rs_ontology":
                     qcRsOntology = true;
@@ -70,6 +76,10 @@ public class QC {
             qcNDAnnotations();
             qcNewLinesInAnnotNotes();
             qcAnnotationsWithInactiveReferences();
+        }
+
+        if( qcInactiveObjects ) {
+            qcActiveQtlsWithInactiveMarkers();
         }
 
         if( qcRsOntology ) {
@@ -221,6 +231,22 @@ public class QC {
             System.out.println(+rgdIds.size()+" RGD IDS WITH MULTIPLE uniprot_seq SEQUENCES");
             for( Integer rgdId: rgdIds ) {
                 System.out.println("    "+rgdId);
+            }
+        }
+
+        // TODO: display orphaned RefSeq Accs (nucleotide RefSeq acc xrefs without a mtahcing transcript object)
+    }
+
+    void qcActiveQtlsWithInactiveMarkers() throws Exception {
+        System.out.println();
+        List<IntStringMapQuery.MapPair> list = dao.getActiveQtlsWithInactiveMarkers();
+        System.out.println("ACTIVE QTLS WITH INACTIVE MARKERS: "+list.size());
+
+        if( !list.isEmpty() ) {
+            logQtls.info("ACTIVE QTLS WITH INACTIVE MARKERS: " + list.size());
+            logQtls.info("===");
+            for (IntStringMapQuery.MapPair pair : list) {
+                logQtls.info("RGD:"+pair.keyValue+"  "+pair.stringValue);
             }
         }
     }
