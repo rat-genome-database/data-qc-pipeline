@@ -1,7 +1,10 @@
 package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.spring.IntStringMapQuery;
+import edu.mcw.rgd.datamodel.QTL;
+import edu.mcw.rgd.datamodel.Reference;
 import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
@@ -10,8 +13,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author mtutaj
@@ -24,6 +26,7 @@ public class QC {
 
     Logger log = Logger.getLogger("core");
     Logger logQtls = Logger.getLogger("qtls_with_inactive_markers");
+    Logger logRelatedQtls = Logger.getLogger("related_qtls");
 
     public static void main(String[] args) throws Exception {
 
@@ -42,10 +45,13 @@ public class QC {
 
     public void run(String[] args) throws Exception {
 
+        boolean qcAll = false;
         boolean qcAnnotations = false;
         boolean qcInactiveObjects = false;
+        boolean qcRelatedQtls = false;
         boolean qcRsOntology = false;
         boolean qcSequences = false;
+        boolean qcTranscripts = false;
 
         // no arguments means to run all qc types
         if( args.length==0 ) {
@@ -54,7 +60,7 @@ public class QC {
         for (String arg : args) {
             switch (arg) {
                 case "--all":
-                    qcAnnotations = qcInactiveObjects = qcSequences = qcRsOntology = true;
+                    qcAll = true;
                     break;
                 case "--annotations":
                     qcAnnotations = true;
@@ -62,32 +68,46 @@ public class QC {
                 case "--inactive_objects":
                     qcInactiveObjects = true;
                     break;
+                case "--related_qtls":
+                    qcRelatedQtls = true;
+                    break;
                 case "--rs_ontology":
                     qcRsOntology = true;
                     break;
                 case "--sequences":
                     qcSequences = true;
                     break;
+                case "--transcripts":
+                    qcTranscripts = true;
+                    break;
             }
         }
 
-        if( qcAnnotations ) {
+        if( qcAnnotations || qcAll ) {
             qcAnnotationsWithMmoNotes();
             qcNDAnnotations();
             qcNewLinesInAnnotNotes();
             qcAnnotationsWithInactiveReferences();
         }
 
-        if( qcInactiveObjects ) {
+        if( qcInactiveObjects || qcAll ) {
             qcActiveQtlsWithInactiveMarkers();
         }
 
-        if( qcRsOntology ) {
+        if( qcRelatedQtls || qcAll ) {
+            qcRelatedQtls();
+        }
+
+        if( qcRsOntology || qcAll ) {
             qcRsOntology();
         }
 
-        if( qcSequences ) {
+        if( qcSequences || qcAll ) {
             qcSequences();
+        }
+
+        if( qcTranscripts || qcAll ) {
+            qcTranscripts();
         }
     }
 
@@ -249,6 +269,57 @@ public class QC {
                 logQtls.info("RGD:"+pair.keyValue+"  "+pair.stringValue);
             }
         }
+    }
+
+    /**
+     * add missing entries in RGD_REF_RGD_IDS table for RELATED_QTLS (per RGDD-153);
+     * what means, that on qtl report page, references listed in section 'Related Qtls' must be also listed in 'Curated References'
+     */
+    void qcRelatedQtls() throws Exception {
+
+        System.out.println();
+
+        List<QTL> qtls = dao.getActiveQtls();
+        Collections.shuffle(qtls);
+
+        int qtlsWithRelatedQtlsTotal = 0;
+
+        List<String> insertedEntries = new ArrayList<>();
+
+        for( QTL q: qtls ) {
+            Set<Integer> refRgdIds = dao.getRefRgdIdsForRelatedQtls(q.getKey());
+            if( refRgdIds==null ) {
+                continue;
+            }
+            qtlsWithRelatedQtlsTotal++;
+
+            for( Integer refRgdId: refRgdIds ) {
+                Reference ref = dao.getReference(refRgdId);
+                if( ref.getReferenceType().equals("JOURNAL ARTICLE") ) {
+                    int inserted = dao.insertReferenceAssociation(ref.getKey(), q.getRgdId());
+                    if( inserted!=0 ) {
+                        insertedEntries.add("  qtl "+q.getSymbol()+" RGD:"+q.getRgdId()+":  inserted reference RGD:"+refRgdId+" for related qtl");
+                    }
+                } else {
+                    System.out.println("unexpected reference type: "+ref.getReferenceType());
+                }
+            }
+        }
+        System.out.println("ACTIVE QTLS WITH RELATED QTLS: "+qtlsWithRelatedQtlsTotal);
+        System.out.println("  added reference associations for related qtls: "+insertedEntries.size());
+
+        if( !insertedEntries.isEmpty() ) {
+            logRelatedQtls.info("Added reference associations for related qtls: "+insertedEntries.size());
+            for( String msg: insertedEntries ) {
+                logRelatedQtls.info(msg);
+            }
+            logRelatedQtls.info("");
+        }
+    }
+
+    void qcTranscripts() {
+
+
     }
 
     public void setVersion(String version) {

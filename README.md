@@ -23,3 +23,7 @@ General purpose qc reports on data integrity.
        with a row in RGD_SEQUENCES table
     2. show integrity issues for uniprot sequences (there should be only one sequence
        of type 'uniprot_seq' per RGD_ID)
+
+5. TRANSCRIPTS
+    1. display orphaned transcript rgd ids (transcript rgd ids that are active in RGD_IDS table, but which do not have
+       corresponding entries in TRANSCRIPTS table)

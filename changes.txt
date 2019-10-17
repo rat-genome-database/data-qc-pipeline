@@ -1,3 +1,6 @@
+2019-10-17
+-added qc for related qtls missing reference associations
+
 v.1.2.7, 2019-05-13
 -inactive objects QC: added reporting of active qtls with inactive markers
 

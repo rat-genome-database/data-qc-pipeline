@@ -1,13 +1,14 @@
 package edu.mcw.rgd;
 
-import edu.mcw.rgd.dao.impl.AnnotationDAO;
-import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.AnnotationQuery;
 import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.IntStringMapQuery;
 import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
 import edu.mcw.rgd.datamodel.EvidenceCode;
+import edu.mcw.rgd.datamodel.QTL;
+import edu.mcw.rgd.datamodel.Reference;
 import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
@@ -26,7 +27,11 @@ import java.util.*;
 public class DAO {
 
     AnnotationDAO adao = new AnnotationDAO();
+    AssociationDAO assocDAO = new AssociationDAO();
     OntologyXDAO odao = new OntologyXDAO();
+    QTLDAO qdao = new QTLDAO();
+    ReferenceDAO rdao = new ReferenceDAO();
+    XdbIdDAO xdao = new XdbIdDAO();
 
     Logger logUpdatedAnnots = Logger.getLogger("updatedAnnots");
     Logger logDeletedNDAnnots = Logger.getLogger("deleted_ND_annots");
@@ -178,10 +183,39 @@ public class DAO {
         return adao.executeAnnotationQuery(sql);
     }
 
+    public List<QTL> getActiveQtls() throws Exception {
+        return qdao.getActiveQTLs();
+    }
+
     public List<IntStringMapQuery.MapPair> getActiveQtlsWithInactiveMarkers() throws Exception {
         String sql = "SELECT q.rgd_id,q.qtl_symbol FROM qtls q\n" +
                 "WHERE EXISTS(select 1 FROM rgd_ids r where (r.rgd_id=q.peak_rgd_id or r.rgd_id=flank_1_rgd_id or r.rgd_id=flank_2_rgd_id) and r.object_status<>'ACTIVE') \n" +
                 "  AND EXISTS(select 1 from rgd_ids i where i.rgd_id=q.rgd_id and i.object_status='ACTIVE')";
         return IntStringMapQuery.execute(adao, sql);
+    }
+
+    public Set<Integer> getRefRgdIdsForRelatedQtls(int qtlKey) throws Exception {
+        Map<Integer, String> relQtls = assocDAO.getQtlToQtlAssociations(qtlKey);
+        if( relQtls.isEmpty() ) {
+            return null;
+        }
+        Set<Integer> refRgdIds = new HashSet<>();
+        for( String str: relQtls.values() ) {
+            int pos1 = str.indexOf("||");
+            int pos2 = str.indexOf("||", pos1+1);
+            int pos3 = str.indexOf("||", pos2+1);
+            String refRgdIdStr = str.substring(pos2+2, pos3);
+            int refRgdId = Integer.parseInt(refRgdIdStr);
+            refRgdIds.add(refRgdId);
+        }
+        return refRgdIds;
+    }
+
+    public Reference getReference(int refRgdId) throws Exception {
+        return rdao.getReferenceByRgdId(refRgdId);
+    }
+
+    public int insertReferenceAssociation(int refKey, int qtlRgdId) throws Exception {
+        return assocDAO.insertReferenceAssociationByKey(refKey, qtlRgdId);
     }
 }
