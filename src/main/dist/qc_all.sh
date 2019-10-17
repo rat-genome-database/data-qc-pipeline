@@ -40,7 +40,7 @@ fi
 
 # if there are any related qtls with missing RGD_REF_RGD_ID entries, email the report with fixes
 if [ -s logs/related_qtls_summary.log ]; then
-  mailx -s "[$SERVER] related qtls with missing RGD_REF_RGD_ID entries" RELATED_QTLS_EMAIL_LIST < logs/related_qtls_summary.log.log
+  mailx -s "[$SERVER] related qtls with missing RGD_REF_RGD_ID entries" RELATED_QTLS_EMAIL_LIST < logs/related_qtls_summary.log
 fi
 
 
