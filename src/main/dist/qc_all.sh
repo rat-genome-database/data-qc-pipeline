@@ -14,7 +14,6 @@ if [ "$SERVER" == "REED" ]; then
     MMO_EMAIL_LIST=mtutaj@mcw.edu,jrsmith@mcw.edu
     INACTIVE_IDS_EMAIL_LIST=sjwang@mcw.edu,gthayman@mcw.edu,mtutaj@mcw.edu
 fi
-RELATED_QTLS_EMAIL_LIST=$MMO_EMAIL_LIST
 
 APPDIR=/home/rgddata/pipelines/$APPNAME
 cd $APPDIR
@@ -40,7 +39,7 @@ fi
 
 # if there are any related qtls with missing RGD_REF_RGD_ID entries, email the report with fixes
 if [ -s logs/related_qtls_summary.log ]; then
-  mailx -s "[$SERVER] related qtls with missing RGD_REF_RGD_ID entries" RELATED_QTLS_EMAIL_LIST < logs/related_qtls_summary.log
+  mailx -s "[$SERVER] related qtls with missing RGD_REF_RGD_ID entries" $MMO_EMAIL_LIST < logs/related_qtls_summary.log
 fi
 
 
