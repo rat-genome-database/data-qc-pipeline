@@ -295,13 +295,13 @@ public class QC {
 
             for( Integer refRgdId: refRgdIds ) {
                 Reference ref = dao.getReference(refRgdId);
-                if( ref.getReferenceType().equals("JOURNAL ARTICLE") ) {
+                if( ref.getReferenceType().equals("JOURNAL ARTICLE") || ref.getReferenceType().equals("ABSTRACT") ) {
                     int inserted = dao.insertReferenceAssociation(ref.getKey(), q.getRgdId());
                     if( inserted!=0 ) {
-                        insertedEntries.add("  qtl "+q.getSymbol()+" RGD:"+q.getRgdId()+":  inserted reference RGD:"+refRgdId+" for related qtl");
+                        insertedEntries.add("  qtl "+q.getSymbol()+" RGD:"+q.getRgdId()+":  inserted reference association RGD:"+refRgdId);
                     }
                 } else {
-                    System.out.println("unexpected reference type: "+ref.getReferenceType());
+                    System.out.println("unexpected reference type: "+ref.getReferenceType()+" for QTL "+q.getSymbol()+", REF_RGD_ID:"+refRgdId);
                 }
             }
         }
