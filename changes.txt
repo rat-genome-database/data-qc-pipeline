@@ -1,3 +1,7 @@
+2019-12-04
+-added qc for gene aliases that are the same as gene symbols/names
+ (such redundant aliases are deleted and logged into deleted_aliases.log)
+
 2019-10-17
 -added qc for related qtls missing reference associations
 

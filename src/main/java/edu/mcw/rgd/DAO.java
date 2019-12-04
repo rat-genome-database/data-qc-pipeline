@@ -1,15 +1,11 @@
 package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.impl.*;
-import edu.mcw.rgd.dao.spring.AnnotationQuery;
 import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.IntStringMapQuery;
 import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
-import edu.mcw.rgd.datamodel.EvidenceCode;
-import edu.mcw.rgd.datamodel.QTL;
-import edu.mcw.rgd.datamodel.Reference;
-import edu.mcw.rgd.datamodel.RgdId;
+import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
@@ -17,6 +13,7 @@ import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.Map;
 
 /**
  * @author mtutaj
@@ -26,12 +23,12 @@ import java.util.*;
  */
 public class DAO {
 
+    AliasDAO aliasDAO = new AliasDAO();
     AnnotationDAO adao = new AnnotationDAO();
     AssociationDAO assocDAO = new AssociationDAO();
     OntologyXDAO odao = new OntologyXDAO();
     QTLDAO qdao = new QTLDAO();
     ReferenceDAO rdao = new ReferenceDAO();
-    XdbIdDAO xdao = new XdbIdDAO();
 
     Logger logUpdatedAnnots = Logger.getLogger("updatedAnnots");
     Logger logDeletedNDAnnots = Logger.getLogger("deleted_ND_annots");
@@ -39,6 +36,20 @@ public class DAO {
     public DAO() {
         System.out.println(adao.getConnectionInfo());
     }
+
+
+    /// ALIASES
+
+    public List<Alias> getRedundantGeneAliases() throws Exception {
+        return aliasDAO.getRedundantGeneAliases();
+    }
+
+    public int deleteAliases(List<Alias> aliasesForDelete) throws Exception {
+        aliasDAO.deleteAliases(aliasesForDelete);
+        // aliasDAO.deleteAliases() returns count of rows deleted, but it is buggy: the count is negative, and double the actual count
+        return aliasesForDelete.size();
+    }
+
 
     public List<Annotation> getAnnotationsWithNewLinesInNotes() throws Exception {
 
