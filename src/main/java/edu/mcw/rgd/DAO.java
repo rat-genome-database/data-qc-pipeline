@@ -45,7 +45,9 @@ public class DAO {
     }
 
     public int deleteAliases(List<Alias> aliasesForDelete) throws Exception {
-        return Math.abs(aliasDAO.deleteAliases(aliasesForDelete));
+        aliasDAO.deleteAliases(aliasesForDelete);
+        // aliasDAO.deleteAliases() returns count of rows deleted, but it is buggy: the count is negative, and double the actual count
+        return aliasesForDelete.size();
     }
 
 
