@@ -1,10 +1,10 @@
 package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.spring.IntStringMapQuery;
+import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.QTL;
 import edu.mcw.rgd.datamodel.Reference;
 import edu.mcw.rgd.datamodel.SpeciesType;
-import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
@@ -46,6 +46,7 @@ public class QC {
     public void run(String[] args) throws Exception {
 
         boolean qcAll = false;
+        boolean qcAliases = false;
         boolean qcAnnotations = false;
         boolean qcInactiveObjects = false;
         boolean qcRelatedQtls = false;
@@ -61,6 +62,9 @@ public class QC {
             switch (arg) {
                 case "--all":
                     qcAll = true;
+                    break;
+                case "--aliases":
+                    qcAliases = true;
                     break;
                 case "--annotations":
                     qcAnnotations = true;
@@ -81,6 +85,10 @@ public class QC {
                     qcTranscripts = true;
                     break;
             }
+        }
+
+        if( qcAliases || qcAll ) {
+            qcRedundantGeneAliases();
         }
 
         if( qcAnnotations || qcAll ) {
@@ -109,6 +117,20 @@ public class QC {
         if( qcTranscripts || qcAll ) {
             qcTranscripts();
         }
+    }
+
+    void qcRedundantGeneAliases() throws Exception {
+
+        Logger logDeletedAliases = Logger.getLogger("deleted_aliases");
+
+        List<Alias> aliases = dao.getRedundantGeneAliases();
+        for( Alias a: aliases ) {
+            logDeletedAliases.info(a.dump("|"));
+        }
+
+        int aliasesDeleted = dao.deleteAliases(aliases);
+        System.out.println();
+        System.out.println("deleted "+aliasesDeleted+" redundant gene aliases (aliases that were the same as gene name or symbol)");
     }
 
     void qcAnnotationsWithMmoNotes() throws Exception {
@@ -321,6 +343,8 @@ public class QC {
 
 
     }
+
+
 
     public void setVersion(String version) {
         this.version = version;
