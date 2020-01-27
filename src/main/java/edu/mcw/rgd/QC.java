@@ -183,15 +183,9 @@ public class QC {
         List<Annotation> annots = dao.getAnnotationsWithNewLinesInNotes();
         for( Annotation a: annots ) {
             String oldNotes = a.getNotes();
-            int oldLen = oldNotes.length();
             String newNotes = a.getNotes().replaceAll("[\\s]+", " ").trim();
             a.setNotes(newNotes);
-            int newLen = newNotes.length();
-            System.out.println("\r\nOLD ["+oldNotes+"]\r\nNEW ["+newNotes+"]");
-            if( newLen < oldLen-2 ) {
-                System.out.println("  big deletion");
-            }
-            dao.updateAnnotation(a);
+            dao.updateAnnotation(a, oldNotes, newNotes);
         }
         System.out.println();
         System.out.println("ANNOTATIONS WITH NEW LINES IN NOTES, FIXED: " +annots.size());

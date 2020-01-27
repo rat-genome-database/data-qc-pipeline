@@ -57,8 +57,10 @@ public class DAO {
         return adao.executeAnnotationQuery(sql);
     }
 
-    public void updateAnnotation(Annotation annot) throws Exception {
+    public void updateAnnotation(Annotation annot, String oldNotes, String newNotes) throws Exception {
         logUpdatedAnnots.debug(annot.dump("|"));
+        logUpdatedAnnots.debug("     OLD NOTES: "+oldNotes);
+        logUpdatedAnnots.debug("     NEW NOTES: "+newNotes);
         adao.updateAnnotation(annot);
     }
 
