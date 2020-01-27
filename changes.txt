@@ -1,3 +1,6 @@
+2020-01-27
+-annotation QC: improved summary of fixing new lines in annotation notes
+
 2019-12-04
 -added qc for gene aliases that are the same as gene symbols/names
  (such redundant aliases are deleted and logged into deleted_aliases.log)
