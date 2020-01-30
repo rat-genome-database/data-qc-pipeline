@@ -25,7 +25,6 @@ dependencies {
     compile 'log4j:log4j:1.2.17'
     compile 'org.springframework:spring-beans:5.1.10.RELEASE'
     compile 'org.springframework:spring-jdbc:5.1.10.RELEASE'
-    compile 'oracle:oracle-jdbc:12.1.0.2'
 
     compile fileTree(dir: 'lib', include: '*.jar')
 }
