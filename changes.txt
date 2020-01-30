@@ -1,3 +1,6 @@
+2020-01-30
+-updated oracle.jar dependency (remote repo discontinued, must use local jar file)
+
 2020-01-27
 -annotation QC: improved summary of fixing new lines in annotation notes
 
