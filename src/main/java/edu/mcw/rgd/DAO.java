@@ -4,6 +4,7 @@ import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.IntStringMapQuery;
+import edu.mcw.rgd.dao.spring.StringListQuery;
 import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.annotation.Evidence;
@@ -230,5 +231,14 @@ public class DAO {
 
     public int insertReferenceAssociation(int refKey, int qtlRgdId) throws Exception {
         return assocDAO.insertReferenceAssociationByKey(refKey, qtlRgdId);
+    }
+
+    public List<String> getDuplicateHgncIds() throws Exception {
+        String sql = "SELECT x1.acc_id||'  RGD:'||x1.rgd_id||', RGD:'||x2.rgd_id ids\n" +
+            "FROM rgd_acc_xdb x1,rgd_acc_xdb x2,rgd_ids i1,rgd_ids i2\n" +
+            "WHERE x1.xdb_key=21 and x2.xdb_key=21 and x1.acc_id=x2.acc_id and x1.rgd_id<x2.rgd_id\n" +
+            "  AND i1.rgd_id=x1.rgd_id and i1.object_key=1 and i1.object_status='ACTIVE'\n" +
+            "  AND i2.rgd_id=x2.rgd_id and i2.object_key=1 and i2.object_status='ACTIVE'";
+        return StringListQuery.execute(adao, sql);
     }
 }

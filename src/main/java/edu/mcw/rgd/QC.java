@@ -48,6 +48,7 @@ public class QC {
         boolean qcAll = false;
         boolean qcAliases = false;
         boolean qcAnnotations = false;
+        boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
         boolean qcRelatedQtls = false;
         boolean qcRsOntology = false;
@@ -68,6 +69,9 @@ public class QC {
                     break;
                 case "--annotations":
                     qcAnnotations = true;
+                    break;
+                case "--hgncId":
+                    qcHgncIds = true;
                     break;
                 case "--inactive_objects":
                     qcInactiveObjects = true;
@@ -98,6 +102,10 @@ public class QC {
             qcAnnotationsWithInactiveReferences();
         }
 
+        if( qcHgncIds || qcAll ) {
+            qcHgncIds();
+        }
+
         if( qcInactiveObjects || qcAll ) {
             qcActiveQtlsWithInactiveMarkers();
         }
@@ -116,6 +124,17 @@ public class QC {
 
         if( qcTranscripts || qcAll ) {
             qcTranscripts();
+        }
+    }
+
+    void qcHgncIds() throws Exception {
+
+        System.out.println();
+        List<String> lines = dao.getDuplicateHgncIds();
+        System.out.println("DUPLICATE HGNC IDS: " +lines.size());
+
+        for( String line: lines ) {
+            System.out.println("   "+line);
         }
     }
 
