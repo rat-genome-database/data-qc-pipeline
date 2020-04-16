@@ -10,7 +10,7 @@ EMAIL_LIST=mtutaj@mcw.edu
 MMO_EMAIL_LIST=mtutaj@mcw.edu
 INACTIVE_IDS_EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
-    EMAIL_LIST=mtutaj@mcw.edu,slaulede@mcw.edu
+    EMAIL_LIST=mtutaj@mcw.edu,slaulede@mcw.edu,jrsmith@mcw.edu
     MMO_EMAIL_LIST=mtutaj@mcw.edu,jrsmith@mcw.edu
     INACTIVE_IDS_EMAIL_LIST=sjwang@mcw.edu,gthayman@mcw.edu,mtutaj@mcw.edu
 fi
@@ -20,7 +20,7 @@ cd $APPDIR
 
 $APPDIR/run.sh --all
 
-mailx -s "[$SERVER] Data QC Pipeline OK" $EMAIL_LIST < run.log
+mailx -s "[$SERVER] Data QC Pipeline OK" $EMAIL_LIST < logs/summary.log
 
 # if there are any ND annotations that have been deleted, email them
 if [ -s logs/deleted_ND_annots_daily.log ]; then

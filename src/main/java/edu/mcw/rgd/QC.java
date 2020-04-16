@@ -8,11 +8,13 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
+import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -24,7 +26,7 @@ public class QC {
     private DAO dao = new DAO();
     private String version;
 
-    Logger log = Logger.getLogger("core");
+    Logger log = Logger.getLogger("status");
     Logger logQtls = Logger.getLogger("qtls_with_inactive_markers");
     Logger logRelatedQtls = Logger.getLogger("related_qtls");
 
@@ -33,7 +35,6 @@ public class QC {
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
         QC manager = (QC) (bf.getBean("manager"));
-        System.out.println(manager.getVersion());
 
         try {
             manager.run(args);
@@ -45,9 +46,18 @@ public class QC {
 
     public void run(String[] args) throws Exception {
 
+        long time0 = System.currentTimeMillis();
+
+        log.info(getVersion());
+        log.info("   "+dao.getConnectionInfo());
+
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        log.info("   started at "+sdt.format(new Date(time0)));
+
         boolean qcAll = false;
         boolean qcAliases = false;
         boolean qcAnnotations = false;
+        boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
         boolean qcRelatedQtls = false;
         boolean qcRsOntology = false;
@@ -68,6 +78,9 @@ public class QC {
                     break;
                 case "--annotations":
                     qcAnnotations = true;
+                    break;
+                case "--hgncId":
+                    qcHgncIds = true;
                     break;
                 case "--inactive_objects":
                     qcInactiveObjects = true;
@@ -98,6 +111,10 @@ public class QC {
             qcAnnotationsWithInactiveReferences();
         }
 
+        if( qcHgncIds || qcAll ) {
+            qcHgncIds();
+        }
+
         if( qcInactiveObjects || qcAll ) {
             qcActiveQtlsWithInactiveMarkers();
         }
@@ -117,6 +134,18 @@ public class QC {
         if( qcTranscripts || qcAll ) {
             qcTranscripts();
         }
+        log.info("=== OK -- elapsed time "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+    }
+
+    void qcHgncIds() throws Exception {
+
+        log.info("");
+        List<String> lines = dao.getDuplicateHgncIds();
+        log.info("DUPLICATE HGNC IDS: " +lines.size());
+
+        for( String line: lines ) {
+            log.info("   "+line);
+        }
     }
 
     void qcRedundantGeneAliases() throws Exception {
@@ -129,8 +158,8 @@ public class QC {
         }
 
         int aliasesDeleted = dao.deleteAliases(aliases);
-        System.out.println();
-        System.out.println("deleted "+aliasesDeleted+" redundant gene aliases (aliases that were the same as gene name or symbol)");
+        log.info("");
+        log.info("deleted "+aliasesDeleted+" redundant gene aliases (aliases that were the same as gene name or symbol)");
     }
 
     void qcAnnotationsWithMmoNotes() throws Exception {
@@ -140,8 +169,8 @@ public class QC {
         issueCount += qcAnnotationsWithMmoNotes(SpeciesType.MOUSE);
         issueCount += qcAnnotationsWithMmoNotes(SpeciesType.RAT);
 
-        System.out.println();
-        System.out.println("CC manual annotations with problematic MMO notes: "+issueCount);
+        log.info("");
+        log.info("CC manual annotations with problematic MMO notes: "+issueCount);
     }
 
     int qcAnnotationsWithMmoNotes(int speciesTypeKey) throws Exception {
@@ -187,8 +216,8 @@ public class QC {
             a.setNotes(newNotes);
             dao.updateAnnotation(a, oldNotes, newNotes);
         }
-        System.out.println();
-        System.out.println("ANNOTATIONS WITH NEW LINES IN NOTES, FIXED: " +annots.size());
+        log.info("");
+        log.info("ANNOTATIONS WITH NEW LINES IN NOTES, FIXED: " +annots.size());
     }
 
     void qcNDAnnotations() throws Exception {
@@ -203,37 +232,37 @@ public class QC {
 
     void qcNDAnnotations(String ontologyId, String aspect) throws Exception {
 
-        System.out.println();
+        log.info("");
 
         List<Annotation> ndAnnots = dao.getNDAnnotationsForRootTerm(ontologyId);
-        System.out.println("QC ND annotations for "+ontologyId+" ontology (aspect "+aspect+") : "+ndAnnots.size());
+        log.info("QC ND annotations for "+ontologyId+" ontology (aspect "+aspect+") : "+ndAnnots.size());
 
         List<Annotation> ndAnnotsForDelete = new ArrayList<>();
         for( Annotation ndAnnot: ndAnnots ) {
             int rgdId = ndAnnot.getAnnotatedObjectRgdId();
             List<Annotation> manualAnnots = dao.getRgdManualAnnotations(rgdId, aspect);
             if( !manualAnnots.isEmpty() ) {
-                System.out.println("  "+manualAnnots.size() + " RGD:"+rgdId);
+                log.info("  "+manualAnnots.size() + " RGD:"+rgdId);
                 ndAnnotsForDelete.add(ndAnnot);
             }
         }
 
         if( ndAnnotsForDelete.isEmpty() ) {
-            System.out.println("  all ND annotations for " + ontologyId + " ontology (aspect " + aspect + ") are valid");
+            log.info("  all ND annotations for " + ontologyId + " ontology (aspect " + aspect + ") are valid");
         } else {
             dao.deleteNDAnnotations(ndAnnotsForDelete);
-            System.out.println("  "+ ndAnnotsForDelete.size() + " ND annotations for " + ontologyId + " ontology (aspect " + aspect + ") have been deleted");
+            log.info("  "+ ndAnnotsForDelete.size() + " ND annotations for " + ontologyId + " ontology (aspect " + aspect + ") have been deleted");
         }
     }
 
     void qcAnnotationsWithInactiveReferences() throws Exception {
 
-        System.out.println();
+        log.info("");
         List<Annotation> annots = dao.getAnnotationsWithInactiveReferences();
         for( Annotation a: annots ) {
-            System.out.println("    "+a.dump("|"));
+            log.info("    "+a.dump("|"));
         }
-        System.out.println("ANNOTATIONS WITH INACTIVE REF_RGD_IDS: " +annots.size());
+        log.info("ANNOTATIONS WITH INACTIVE REF_RGD_IDS: " +annots.size());
     }
 
     /**
@@ -243,30 +272,30 @@ public class QC {
     void qcRsOntology() throws Exception {
 
         List<TermSynonym> malformedRsSynonyms = dao.getMalformedRsSynonyms();
-        System.out.println();
-        System.out.println("MALFORMED RS SYNONYMS: "+malformedRsSynonyms.size());
+        log.info("");
+        log.info("MALFORMED RS SYNONYMS: "+malformedRsSynonyms.size());
         if( !malformedRsSynonyms.isEmpty() ) {
-            System.out.println();
+            log.info("");
             for( TermSynonym ts: malformedRsSynonyms ) {
-                System.out.println("TERM_ACC:"+ts.getTermAcc()+"  SYN: ["+ts.getName()+"]");
+                log.info("TERM_ACC:"+ts.getTermAcc()+"  SYN: ["+ts.getName()+"]");
             }
         }
     }
 
     void qcSequences() throws Exception {
 
-        System.out.println();
+        log.info("");
         int count = dao.getCountOfOrphanedSequences();
-        System.out.println("ORPHANED SEQUENCES: "+count);
+        log.info("ORPHANED SEQUENCES: "+count);
 
-        System.out.println();
+        log.info("");
         List<Integer> rgdIds = dao.getRgdIdsWithMultipleSequences("uniprot_seq");
         if( rgdIds.isEmpty() ) {
-            System.out.println("NO RGD IDS WITH MULTIPLE uniprot_seq SEQUENCES");
+            log.info("NO RGD IDS WITH MULTIPLE uniprot_seq SEQUENCES");
         } else {
-            System.out.println(+rgdIds.size()+" RGD IDS WITH MULTIPLE uniprot_seq SEQUENCES");
+            log.info(+rgdIds.size()+" RGD IDS WITH MULTIPLE uniprot_seq SEQUENCES");
             for( Integer rgdId: rgdIds ) {
-                System.out.println("    "+rgdId);
+                log.info("    "+rgdId);
             }
         }
 
@@ -274,9 +303,9 @@ public class QC {
     }
 
     void qcActiveQtlsWithInactiveMarkers() throws Exception {
-        System.out.println();
+        log.info("");
         List<IntStringMapQuery.MapPair> list = dao.getActiveQtlsWithInactiveMarkers();
-        System.out.println("ACTIVE QTLS WITH INACTIVE MARKERS: "+list.size());
+        log.info("ACTIVE QTLS WITH INACTIVE MARKERS: "+list.size());
 
         if( !list.isEmpty() ) {
             logQtls.info("ACTIVE QTLS WITH INACTIVE MARKERS: " + list.size());
@@ -293,7 +322,7 @@ public class QC {
      */
     void qcRelatedQtls() throws Exception {
 
-        System.out.println();
+        log.info("");
 
         List<QTL> qtls = dao.getActiveQtls();
         Collections.shuffle(qtls);
@@ -317,12 +346,12 @@ public class QC {
                         insertedEntries.add("  qtl "+q.getSymbol()+" RGD:"+q.getRgdId()+":  inserted reference association RGD:"+refRgdId);
                     }
                 } else {
-                    System.out.println("unexpected reference type: "+ref.getReferenceType()+" for QTL "+q.getSymbol()+", REF_RGD_ID:"+refRgdId);
+                    log.info("unexpected reference type: "+ref.getReferenceType()+" for QTL "+q.getSymbol()+", REF_RGD_ID:"+refRgdId);
                 }
             }
         }
-        System.out.println("ACTIVE QTLS WITH RELATED QTLS: "+qtlsWithRelatedQtlsTotal);
-        System.out.println("  added reference associations for related qtls: "+insertedEntries.size());
+        log.info("ACTIVE QTLS WITH RELATED QTLS: "+qtlsWithRelatedQtlsTotal);
+        log.info("  added reference associations for related qtls: "+insertedEntries.size());
 
         if( !insertedEntries.isEmpty() ) {
             logRelatedQtls.info("Added reference associations for related qtls: "+insertedEntries.size());
