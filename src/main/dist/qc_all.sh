@@ -20,7 +20,7 @@ cd $APPDIR
 
 $APPDIR/run.sh --all
 
-mailx -s "[$SERVER] Data QC Pipeline OK" $EMAIL_LIST < run.log
+mailx -s "[$SERVER] Data QC Pipeline OK" $EMAIL_LIST < logs/summary.log
 
 # if there are any ND annotations that have been deleted, email them
 if [ -s logs/deleted_ND_annots_daily.log ]; then

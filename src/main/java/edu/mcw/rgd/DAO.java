@@ -34,8 +34,8 @@ public class DAO {
     Logger logUpdatedAnnots = Logger.getLogger("updatedAnnots");
     Logger logDeletedNDAnnots = Logger.getLogger("deleted_ND_annots");
 
-    public DAO() {
-        System.out.println(adao.getConnectionInfo());
+    public String getConnectionInfo() {
+        return adao.getConnectionInfo();
     }
 
 

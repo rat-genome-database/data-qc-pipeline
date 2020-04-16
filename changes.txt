@@ -1,6 +1,7 @@
 2020-04-16
--added reporting of duplicate hgnc ids
-
+  added reporting of duplicate hgnc ids
+  revamped logging
+  
 2020-04-06
 -discontinued logging of details of qtls with inactive markers in the main summary email
 
