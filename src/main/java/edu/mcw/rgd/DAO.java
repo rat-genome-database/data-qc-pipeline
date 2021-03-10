@@ -248,7 +248,7 @@ public class DAO {
                 "WHERE transcript_rgd_id=i.rgd_id AND i.object_status='ACTIVE' AND species_type_key=? AND acc_id NOT LIKE 'ENS%'\n" +
                 "MINUS\n" +
                 "SELECT x.rgd_id gene_rgd_id,acc_id FROM rgd_acc_xdb x,rgd_ids i\n" +
-                "WHERE x.rgd_id=i.rgd_id AND i.object_status='ACTIVE' AND species_type_key=? AND xdb_key=1";
+                "WHERE x.rgd_id=i.rgd_id AND species_type_key=? AND xdb_key=1";
         return IntStringMapQuery.execute(adao, sql, speciesTypeKey, speciesTypeKey);
     }
 
