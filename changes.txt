@@ -1,3 +1,6 @@
+2021-03-10
+  added transcript qc: creates NCBI nucleotide xdb ids for the transcripts missing them
+
 2020-04-16
   added reporting of duplicate hgnc ids
   revamped logging

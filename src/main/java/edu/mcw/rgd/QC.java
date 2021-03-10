@@ -1,10 +1,7 @@
 package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.spring.IntStringMapQuery;
-import edu.mcw.rgd.datamodel.Alias;
-import edu.mcw.rgd.datamodel.QTL;
-import edu.mcw.rgd.datamodel.Reference;
-import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
@@ -362,9 +359,37 @@ public class QC {
         }
     }
 
-    void qcTranscripts() {
+    void qcTranscripts() throws Exception {
 
+        log.info("");
 
+        int xdbIdsInserted = 0;
+
+        for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
+            if( SpeciesType.isSearchable(speciesTypeKey) ) {
+
+                List<IntStringMapQuery.MapPair> list = dao.getNcbiTranscriptsWithoutXdbIds(speciesTypeKey);
+                if( !list.isEmpty() ) {
+                    List<XdbId> xdbIds = new ArrayList<>(list.size());
+                    for( IntStringMapQuery.MapPair pair: list ) {
+                        XdbId xdbId = new XdbId();
+                        xdbId.setAccId(pair.stringValue);
+                        xdbId.setRgdId(pair.keyValue);
+                        xdbId.setSrcPipeline("RGD");
+                        xdbId.setXdbKey(XdbId.XDB_KEY_GENEBANKNU);
+                        xdbId.setCreationDate(new Date());
+                        xdbId.setModificationDate(new Date());
+                        xdbIds.add(xdbId);
+                    }
+
+                    int inserted = dao.insertXdbIds(xdbIds);
+                    log.info("  inserted NCBI nucleotide xdb ids for "+SpeciesType.getCommonName(speciesTypeKey)+" transcripts: "+inserted);
+                    xdbIdsInserted += inserted;
+                }
+            }
+        }
+
+        log.info("INSERTED NCBI NUCLEOTIDE XDB IDS FOR TRANSCRIPTS: "+xdbIdsInserted);
     }
 
 
