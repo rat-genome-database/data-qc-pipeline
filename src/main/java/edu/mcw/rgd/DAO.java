@@ -30,6 +30,7 @@ public class DAO {
     OntologyXDAO odao = new OntologyXDAO();
     QTLDAO qdao = new QTLDAO();
     ReferenceDAO rdao = new ReferenceDAO();
+    XdbIdDAO xdao = new XdbIdDAO();
 
     Logger logUpdatedAnnots = Logger.getLogger("updatedAnnots");
     Logger logDeletedNDAnnots = Logger.getLogger("deleted_ND_annots");
@@ -240,5 +241,19 @@ public class DAO {
             "  AND i1.rgd_id=x1.rgd_id and i1.object_key=1 and i1.object_status='ACTIVE'\n" +
             "  AND i2.rgd_id=x2.rgd_id and i2.object_key=1 and i2.object_status='ACTIVE'";
         return StringListQuery.execute(adao, sql);
+    }
+
+    public List<IntStringMapQuery.MapPair> getNcbiTranscriptsWithoutXdbIds(int speciesTypeKey) throws Exception {
+        String sql = "SELECT gene_rgd_id,acc_id FROM transcripts t,rgd_ids i\n" +
+                "WHERE transcript_rgd_id=i.rgd_id AND i.object_status='ACTIVE' AND species_type_key=? AND acc_id NOT LIKE 'ENS%'\n" +
+                "MINUS\n" +
+                "SELECT x.rgd_id gene_rgd_id,acc_id FROM rgd_acc_xdb x,rgd_ids i\n" +
+                "WHERE x.rgd_id=i.rgd_id AND species_type_key=? AND xdb_key=1";
+        return IntStringMapQuery.execute(adao, sql, speciesTypeKey, speciesTypeKey);
+    }
+
+    public int insertXdbIds(List<XdbId> xdbIds) throws Exception {
+        xdao.insertXdbs(xdbIds);
+        return xdbIds.size();
     }
 }

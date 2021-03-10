@@ -27,3 +27,5 @@ General purpose qc reports on data integrity.
 5. TRANSCRIPTS
     1. display orphaned transcript rgd ids (transcript rgd ids that are active in RGD_IDS table, but which do not have
        corresponding entries in TRANSCRIPTS table)
+        2. create NCBI nucleotide xdb ids for transcripts missing them
+           (usually for transcripts that are active on older assembly, but discontinued on new assembly)
