@@ -1,3 +1,6 @@
+2021-12-22
+  updated log4j to avoid zero day exploit
+
 2021-03-10
   added transcript qc: creates NCBI nucleotide xdb ids for the transcripts missing them
 

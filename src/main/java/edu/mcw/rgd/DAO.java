@@ -11,7 +11,8 @@ import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.Map;
@@ -32,8 +33,8 @@ public class DAO {
     ReferenceDAO rdao = new ReferenceDAO();
     XdbIdDAO xdao = new XdbIdDAO();
 
-    Logger logUpdatedAnnots = Logger.getLogger("updatedAnnots");
-    Logger logDeletedNDAnnots = Logger.getLogger("deleted_ND_annots");
+    Logger logUpdatedAnnots = LogManager.getLogger("updatedAnnots");
+    Logger logDeletedNDAnnots = LogManager.getLogger("deleted_ND_annots");
 
     public String getConnectionInfo() {
         return adao.getConnectionInfo();

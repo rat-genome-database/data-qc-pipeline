@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/> -->
+            <PatternLayout pattern="[%d{yyyy-MM-hh HH:mm:ss}] %msg%n"/>
+        </Console>
+
+        <RollingFile name="status" append="true" fileName="logs/status.log" filePattern="logs/status.log.%d{yyyy-MM}">
+            <PatternLayout pattern="%d %p [%c] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="summary" append="false" fileName="logs/summary.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+        <RollingFile name="detail" append="true" fileName="logs/detail.log" filePattern="logs/detail.log.%d{yyyy-MM}">
+            <PatternLayout pattern="%d %p [%c] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="deleted_ND_annots" append="true" fileName="logs/deleted_ND_annots.log" filePattern="logs/deleted_ND_annots.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="deleted_ND_annots_daily" append="false" fileName="logs/deleted_ND_annots_daily.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+
+        <RollingFile name="annots_with_MMO_issues" append="true" fileName="logs/annots_with_MMO_issues.log" filePattern="logs/annots_with_MMO_issues.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="annots_with_MMO_issues_daily" append="false" fileName="logs/annots_with_MMO_issues_daily.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+
+        <RollingFile name="related_qtls" append="true" fileName="logs/related_qtls.log" filePattern="logs/related_qtls.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="related_qtls_summary" append="false" fileName="logs/related_qtls_summary.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+
+        <RollingFile name="qtls_with_inactive_markers" append="true" fileName="logs/qtls_with_inactive_markers.log" filePattern="logs/qtls_with_inactive_markers.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="qtls_with_inactive_markers_simple" append="false" fileName="logs/qtls_with_inactive_markers_simple.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+
+
+        <RollingFile name="deleted_aliases" append="true" fileName="logs/deleted_aliases.log" filePattern="logs/deleted_aliases.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="updatedAnnots" append="true" fileName="logs/updatedAnnots.log" filePattern="logs/updatedAnnots.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <!-- daily -->
+        <Logger name="status" level="debug" additivity="false">
+            <AppenderRef ref="status" level="info"/>
+            <AppenderRef ref="summary" level="info"/><!-- human readable -->
+            <AppenderRef ref="detail"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+
+        <!-- monthly -->
+        <Logger name="deleted_ND_annots" level="debug" additivity="false">
+            <AppenderRef ref="deleted_ND_annots"/>
+            <AppenderRef ref="deleted_ND_annots_daily"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="annots_with_MMO_issues" level="debug" additivity="false">
+            <AppenderRef ref="annots_with_MMO_issues"/>
+            <AppenderRef ref="annots_with_MMO_issues_daily"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="related_qtls" level="debug" additivity="false">
+            <AppenderRef ref="related_qtls"/>
+            <AppenderRef ref="related_qtls_summary"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="qtls_with_inactive_markers" level="debug" additivity="false">
+            <AppenderRef ref="qtls_with_inactive_markers"/>
+            <AppenderRef ref="qtls_with_inactive_markers"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+
+        <Logger name="deleted_aliases" level="debug" additivity="false">
+            <AppenderRef ref="deleted_aliases"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="updatedAnnots" level="debug" additivity="false">
+            <AppenderRef ref="updatedAnnots"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+    </Loggers>
+</Configuration>

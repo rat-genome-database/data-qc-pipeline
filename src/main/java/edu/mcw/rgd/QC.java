@@ -6,7 +6,8 @@ import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.process.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -23,9 +24,9 @@ public class QC {
     private DAO dao = new DAO();
     private String version;
 
-    Logger log = Logger.getLogger("status");
-    Logger logQtls = Logger.getLogger("qtls_with_inactive_markers");
-    Logger logRelatedQtls = Logger.getLogger("related_qtls");
+    Logger log = LogManager.getLogger("status");
+    Logger logQtls = LogManager.getLogger("qtls_with_inactive_markers");
+    Logger logRelatedQtls = LogManager.getLogger("related_qtls");
 
     public static void main(String[] args) throws Exception {
 
@@ -36,7 +37,7 @@ public class QC {
         try {
             manager.run(args);
         }catch (Exception e) {
-            manager.log.error(e);
+            Utils.printStackTrace(e, manager.log);
             throw e;
         }
     }
@@ -147,7 +148,7 @@ public class QC {
 
     void qcRedundantGeneAliases() throws Exception {
 
-        Logger logDeletedAliases = Logger.getLogger("deleted_aliases");
+        Logger logDeletedAliases = LogManager.getLogger("deleted_aliases");
 
         List<Alias> aliases = dao.getRedundantGeneAliases();
         for( Alias a: aliases ) {
@@ -172,7 +173,7 @@ public class QC {
 
     int qcAnnotationsWithMmoNotes(int speciesTypeKey) throws Exception {
 
-        Logger logMMO = Logger.getLogger("annots_with_MMO_issues");
+        Logger logMMO = LogManager.getLogger("annots_with_MMO_issues");
 
         int issueCount = 0;
         List<Annotation> annots = dao.getRgdManualAnnotationsWithMmoNotes(speciesTypeKey);
