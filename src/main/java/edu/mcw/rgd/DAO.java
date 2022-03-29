@@ -14,6 +14,9 @@ import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 import java.util.Map;
 
@@ -52,7 +55,6 @@ public class DAO {
         // aliasDAO.deleteAliases() returns count of rows deleted, but it is buggy: the count is negative, and double the actual count
         return aliasesForDelete.size();
     }
-
 
     public List<Annotation> getAnnotationsWithNewLinesInNotes() throws Exception {
 
@@ -256,5 +258,61 @@ public class DAO {
     public int insertXdbIds(List<XdbId> xdbIds) throws Exception {
         xdao.insertXdbs(xdbIds);
         return xdbIds.size();
+    }
+
+    public List<GenomicElement []> getGeneAllelesWithSameSymbols() throws Exception {
+        String sql = "SELECT g1.rgd_id i1,g2.rgd_id i2,g1.gene_symbol s1,g2.gene_symbol s2,g1.full_name f1,g2.full_name f2\n"+
+                "FROM genes g1,genes g2,rgd_ids i1,rgd_ids i2\n" +
+                "WHERE g1.gene_symbol=g2.gene_symbol AND g1.rgd_id<g2.rgd_id AND i1.species_type_key=i2.species_type_key\n" +
+                "  AND g1.rgd_id=i1.rgd_id AND i1.object_status='ACTIVE' AND g1.gene_type_lc IN('allele','variant')\n" +
+                "  AND g2.rgd_id=i2.rgd_id AND i2.object_status='ACTIVE' AND g2.gene_type_lc IN('allele','variant')\n";
+
+        List<GenomicElement[]> result = new ArrayList<>();
+
+        try( Connection conn = adao.getConnection() ) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while( rs.next() ) {
+                GenomicElement[] arr = new GenomicElement[2];
+                arr[0] = new GenomicElement();
+                arr[1] = new GenomicElement();
+                arr[0].setRgdId(rs.getInt(1));
+                arr[1].setRgdId(rs.getInt(2));
+                arr[0].setSymbol(rs.getString(3));
+                arr[1].setSymbol(rs.getString(4));
+                arr[0].setName(rs.getString(5));
+                arr[1].setName(rs.getString(6));
+                result.add(arr);
+            }
+        }
+        return result;
+    }
+
+    public List<GenomicElement []> getGeneAllelesWithSameNames() throws Exception {
+        String sql = "SELECT g1.rgd_id i1,g2.rgd_id i2,g1.gene_symbol s1,g2.gene_symbol s2,g1.full_name f1,g2.full_name f2\n"+
+                "FROM genes g1,genes g2,rgd_ids i1,rgd_ids i2\n" +
+                "WHERE g1.full_name=g2.full_name AND g1.rgd_id<g2.rgd_id AND i1.species_type_key=i2.species_type_key\n" +
+                "  AND g1.rgd_id=i1.rgd_id AND i1.object_status='ACTIVE' AND g1.gene_type_lc IN('allele','variant')\n" +
+                "  AND g2.rgd_id=i2.rgd_id AND i2.object_status='ACTIVE' AND g2.gene_type_lc IN('allele','variant')\n";
+
+        List<GenomicElement[]> result = new ArrayList<>();
+
+        try( Connection conn = adao.getConnection() ) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while( rs.next() ) {
+                GenomicElement[] arr = new GenomicElement[2];
+                arr[0] = new GenomicElement();
+                arr[1] = new GenomicElement();
+                arr[0].setRgdId(rs.getInt(1));
+                arr[1].setRgdId(rs.getInt(2));
+                arr[0].setSymbol(rs.getString(3));
+                arr[1].setSymbol(rs.getString(4));
+                arr[0].setName(rs.getString(5));
+                arr[1].setName(rs.getString(6));
+                result.add(arr);
+            }
+        }
+        return result;
     }
 }

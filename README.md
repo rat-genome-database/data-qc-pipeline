@@ -14,6 +14,10 @@ General purpose qc reports on data integrity.
 2. INACTIVE OBJECTS
     1. Report active qtls that have one or more position markers that are inactive
 
+2. DUPLICATE GENE ALLELES
+    1. Report active gene allele pairs that have the same gene symbol
+    2. Report active gene allele pairs that have the same gene name
+
 3. ONTOLOGIES
     1. Synonyms for RS ontology that contain text 'RGD ID' are checked if the RGD ID is properly formatted
        (it must be exactly in the format: 'RGD ID: rgdid', where 'rgdid' is a numeric value)

@@ -7,10 +7,12 @@ APPNAME=DataQCPipeline
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 
 EMAIL_LIST=mtutaj@mcw.edu
+ALLELE_EMAIL_LIST=mtutaj@mcw.edu
 MMO_EMAIL_LIST=mtutaj@mcw.edu
 INACTIVE_IDS_EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
     EMAIL_LIST=mtutaj@mcw.edu,slaulede@mcw.edu,jrsmith@mcw.edu
+    ALLELE_EMAIL_LIST=mtutaj@mcw.edu,sjwang@mcw.edu
     MMO_EMAIL_LIST=mtutaj@mcw.edu,jrsmith@mcw.edu
     INACTIVE_IDS_EMAIL_LIST=sjwang@mcw.edu,gthayman@mcw.edu,mtutaj@mcw.edu
 fi
@@ -42,4 +44,8 @@ if [ -s logs/related_qtls_summary.log ]; then
   mailx -s "[$SERVER] related qtls with missing RGD_REF_RGD_ID entries" $MMO_EMAIL_LIST < logs/related_qtls_summary.log
 fi
 
+# if there are gene alleles having the same symbols or names, email them
+if [ -s logs/duplicate_alleles_simple.log ]; then
+  mailx -s "[$SERVER] duplicate gene alleles" $ALLELE_EMAIL_LIST < logs/duplicate_alleles_simple.log
+fi
 

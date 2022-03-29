@@ -55,6 +55,7 @@ public class QC {
         boolean qcAll = false;
         boolean qcAliases = false;
         boolean qcAnnotations = false;
+        boolean qcDuplicateAlleles = false;
         boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
         boolean qcRelatedQtls = false;
@@ -73,6 +74,9 @@ public class QC {
                     break;
                 case "--aliases":
                     qcAliases = true;
+                    break;
+                case "--duplicate_alleles":
+                    qcDuplicateAlleles = true;
                     break;
                 case "--annotations":
                     qcAnnotations = true;
@@ -109,6 +113,10 @@ public class QC {
             qcAnnotationsWithInactiveReferences();
         }
 
+        if( qcDuplicateAlleles || qcAll ) {
+            qcAlleles();
+        }
+
         if( qcHgncIds || qcAll ) {
             qcHgncIds();
         }
@@ -133,6 +141,34 @@ public class QC {
             qcTranscripts();
         }
         log.info("=== OK -- elapsed time "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+    }
+
+    void qcAlleles() throws Exception {
+
+        log.info("");
+        List<GenomicElement[]> results = dao.getGeneAllelesWithSameSymbols();
+        log.info("GENE ALLELES WITH DUPLICATE SYMBOLS: " +results.size());
+
+        if( !results.isEmpty() ) {
+            log.info("===");
+            for (GenomicElement[] arr : results) {
+                log.info("RGD1:"+arr[0].getRgdId()+" SYMBOL1=["+arr[0].getSymbol()+"]  NAME1=["+arr[0].getName()+"]");
+                log.info("RGD2:"+arr[1].getRgdId()+" SYMBOL2=["+arr[1].getSymbol()+"]  NAME2=["+arr[1].getName()+"]");
+            }
+            log.info("===");
+        }
+
+        results = dao.getGeneAllelesWithSameNames();
+        log.info("GENE ALLELES WITH DUPLICATE NAMES: " +results.size());
+
+        if( !results.isEmpty() ) {
+            log.info("===");
+            for (GenomicElement[] arr : results) {
+                log.info("RGD1:"+arr[0].getRgdId()+" SYMBOL1=["+arr[0].getSymbol()+"]  NAME1=["+arr[0].getName()+"]");
+                log.info("RGD2:"+arr[1].getRgdId()+" SYMBOL2=["+arr[1].getSymbol()+"]  NAME2=["+arr[1].getName()+"]");
+            }
+            log.info("===");
+        }
     }
 
     void qcHgncIds() throws Exception {
