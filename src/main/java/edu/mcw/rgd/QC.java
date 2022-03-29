@@ -148,19 +148,21 @@ public class QC {
 
         log.info("");
         List<GenomicElement[]> results = dao.getGeneAllelesWithSameSymbols();
-        log.info("GENE ALLELES WITH DUPLICATE SYMBOLS: " +results.size());
-        dumpDuplicateAlleles(results);
+        dumpDuplicateAlleles("GENE ALLELES WITH DUPLICATE SYMBOLS: ", results);
 
         results = dao.getGeneAllelesWithSameNames();
-        log.info("GENE ALLELES WITH DUPLICATE NAMES: " +results.size());
-        dumpDuplicateAlleles(results);
+        dumpDuplicateAlleles("GENE ALLELES WITH DUPLICATE NAMES: ", results);
     }
 
-    void dumpDuplicateAlleles(List<GenomicElement[]> results) {
+    void dumpDuplicateAlleles(String title, List<GenomicElement[]> results) {
+        String msg = title + results.size();
+        log.info(msg);
+        logDuplicateAlleles.info(msg);
+
         if( !results.isEmpty() ) {
             log.info("===");
             for (GenomicElement[] arr : results) {
-                String msg = "RGD1:"+arr[0].getRgdId()+" SYMBOL1=["+arr[0].getSymbol()+"]  NAME1=["+arr[0].getName()+"]";
+                msg = "RGD1:"+arr[0].getRgdId()+" SYMBOL1=["+arr[0].getSymbol()+"]  NAME1=["+arr[0].getName()+"]";
                 log.info(msg);
                 logDuplicateAlleles.info(msg);
 
@@ -171,8 +173,8 @@ public class QC {
             log.info("===");
             logDuplicateAlleles.info("===");
         }
-
     }
+
     void qcHgncIds() throws Exception {
 
         log.info("");
