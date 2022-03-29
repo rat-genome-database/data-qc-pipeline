@@ -27,6 +27,7 @@ public class QC {
     Logger log = LogManager.getLogger("status");
     Logger logQtls = LogManager.getLogger("qtls_with_inactive_markers");
     Logger logRelatedQtls = LogManager.getLogger("related_qtls");
+    Logger logDuplicateAlleles = LogManager.getLogger("duplicate_alleles");
 
     public static void main(String[] args) throws Exception {
 
@@ -148,29 +149,30 @@ public class QC {
         log.info("");
         List<GenomicElement[]> results = dao.getGeneAllelesWithSameSymbols();
         log.info("GENE ALLELES WITH DUPLICATE SYMBOLS: " +results.size());
-
-        if( !results.isEmpty() ) {
-            log.info("===");
-            for (GenomicElement[] arr : results) {
-                log.info("RGD1:"+arr[0].getRgdId()+" SYMBOL1=["+arr[0].getSymbol()+"]  NAME1=["+arr[0].getName()+"]");
-                log.info("RGD2:"+arr[1].getRgdId()+" SYMBOL2=["+arr[1].getSymbol()+"]  NAME2=["+arr[1].getName()+"]");
-            }
-            log.info("===");
-        }
+        dumpDuplicateAlleles(results);
 
         results = dao.getGeneAllelesWithSameNames();
         log.info("GENE ALLELES WITH DUPLICATE NAMES: " +results.size());
+        dumpDuplicateAlleles(results);
+    }
 
+    void dumpDuplicateAlleles(List<GenomicElement[]> results) {
         if( !results.isEmpty() ) {
             log.info("===");
             for (GenomicElement[] arr : results) {
-                log.info("RGD1:"+arr[0].getRgdId()+" SYMBOL1=["+arr[0].getSymbol()+"]  NAME1=["+arr[0].getName()+"]");
-                log.info("RGD2:"+arr[1].getRgdId()+" SYMBOL2=["+arr[1].getSymbol()+"]  NAME2=["+arr[1].getName()+"]");
+                String msg = "RGD1:"+arr[0].getRgdId()+" SYMBOL1=["+arr[0].getSymbol()+"]  NAME1=["+arr[0].getName()+"]";
+                log.info(msg);
+                logDuplicateAlleles.info(msg);
+
+                msg = "RGD2:"+arr[1].getRgdId()+" SYMBOL2=["+arr[1].getSymbol()+"]  NAME2=["+arr[1].getName()+"]";
+                log.info(msg);
+                logDuplicateAlleles.info(msg);
             }
             log.info("===");
+            logDuplicateAlleles.info("===");
         }
-    }
 
+    }
     void qcHgncIds() throws Exception {
 
         log.info("");

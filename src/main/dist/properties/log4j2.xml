@@ -128,7 +128,6 @@
         <Logger name="duplicate_alleles" level="debug" additivity="false">
             <AppenderRef ref="duplicate_alleles_simple"/>
             <AppenderRef ref="duplicate_alleles"/>
-            <AppenderRef ref="Console" level="info"/>
         </Logger>
 
         <Logger name="deleted_aliases" level="debug" additivity="false">
