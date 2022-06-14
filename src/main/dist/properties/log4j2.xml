@@ -7,7 +7,7 @@
         </Console>
 
         <RollingFile name="status" append="true" fileName="logs/status.log" filePattern="logs/status.log.%d{yyyy-MM}">
-            <PatternLayout pattern="%d %p [%c] - %m%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %p [%c] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
@@ -17,14 +17,14 @@
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
         </File>
         <RollingFile name="detail" append="true" fileName="logs/detail.log" filePattern="logs/detail.log.%d{yyyy-MM}">
-            <PatternLayout pattern="%d %p [%c] - %m%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %p [%c] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
         </RollingFile>
 
         <RollingFile name="deleted_ND_annots" append="true" fileName="logs/deleted_ND_annots.log" filePattern="logs/deleted_ND_annots.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d] - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
@@ -35,7 +35,7 @@
         </File>
 
         <RollingFile name="annots_with_MMO_issues" append="true" fileName="logs/annots_with_MMO_issues.log" filePattern="logs/annots_with_MMO_issues.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d] - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
@@ -46,7 +46,7 @@
         </File>
 
         <RollingFile name="related_qtls" append="true" fileName="logs/related_qtls.log" filePattern="logs/related_qtls.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d] - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
@@ -57,7 +57,7 @@
         </File>
 
         <RollingFile name="qtls_with_inactive_markers" append="true" fileName="logs/qtls_with_inactive_markers.log" filePattern="logs/qtls_with_inactive_markers.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d] - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
@@ -68,7 +68,7 @@
         </File>
 
         <RollingFile name="duplicate_alleles" append="true" fileName="logs/duplicate_alleles.log" filePattern="logs/duplicate_alleles.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d] - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
@@ -79,13 +79,13 @@
         </File>
 
         <RollingFile name="deleted_aliases" append="true" fileName="logs/deleted_aliases.log" filePattern="logs/deleted_aliases.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d] - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
         </RollingFile>
         <RollingFile name="updatedAnnots" append="true" fileName="logs/updatedAnnots.log" filePattern="logs/updatedAnnots.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d] - %m%n"/>
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
