@@ -59,6 +59,7 @@ public class QC {
         boolean qcDuplicateAlleles = false;
         boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
+        boolean qcOrphanTerms = false;
         boolean qcRelatedQtls = false;
         boolean qcRsOntology = false;
         boolean qcSequences = false;
@@ -87,6 +88,9 @@ public class QC {
                     break;
                 case "--inactive_objects":
                     qcInactiveObjects = true;
+                    break;
+                case "--orphan_terms":
+                    qcOrphanTerms = true;
                     break;
                 case "--related_qtls":
                     qcRelatedQtls = true;
@@ -132,6 +136,10 @@ public class QC {
 
         if( qcRsOntology || qcAll ) {
             qcRsOntology();
+        }
+
+        if( qcOrphanTerms || qcAll ) {
+            qcOrphanTerms();
         }
 
         if( qcSequences || qcAll ) {
@@ -316,6 +324,24 @@ public class QC {
             log.info("");
             for( TermSynonym ts: malformedRsSynonyms ) {
                 log.info("TERM_ACC:"+ts.getTermAcc()+"  SYN: ["+ts.getName()+"]");
+            }
+        }
+    }
+
+    /**
+     * 'orphan-term' - active ontology term without parent terms and child terms
+     * @throws Exception
+     */
+    void qcOrphanTerms() throws Exception {
+
+        log.info("");
+        log.info("ORPHAN TERMS:");
+        // currently check ontologies maintained by RGD
+        String[] ontIds = {"RDO", "RS", "CMO", "MMO", "XCO", "PW"};
+        for( String ontId: ontIds ) {
+            List<String> orphanTermAccs = dao.getOrphanTerms(ontId);
+            if( !orphanTermAccs.isEmpty() ) {
+                log.info("    "+ontId+": "+Utils.concatenate(orphanTermAccs,", "));
             }
         }
     }

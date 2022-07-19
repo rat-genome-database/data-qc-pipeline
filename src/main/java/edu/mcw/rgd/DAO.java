@@ -174,6 +174,12 @@ public class DAO {
         return odao.getTermWithStatsCached(termAcc);
     }
 
+    public List<String> getOrphanTerms(String ontId) throws Exception {
+        String sql = "SELECT term_acc FROM ont_terms t WHERE ont_id=? AND is_obsolete=0\n" +
+                "  AND NOT EXISTS(SELECT 1 FROM ont_dag d WHERE t.term_acc=parent_term_acc OR t.term_acc=child_term_acc)";
+        return StringListQuery.execute(odao, sql, ontId);
+    }
+
     /**
      * get list of RGD IDS having multiple sequences of given type per RGD ID
      * @param seqType sequence type

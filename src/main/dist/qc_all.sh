@@ -49,3 +49,7 @@ if [ -s logs/duplicate_alleles_simple.log ]; then
   mailx -s "[$SERVER] duplicate gene alleles" $ALLELE_EMAIL_LIST < logs/duplicate_alleles_simple.log
 fi
 
+# if there are gene alleles having the same symbols or names, email them
+if [ -s logs/orphan_terms_summary.log ]; then
+  mailx -s "[$SERVER] orphan terms" mtutaj@mcw.edu < logs/orphan_terms_summary.log
+fi

@@ -1,3 +1,6 @@
+Jul 19, 2022
+  added reporting of orphan terms in ontologies maintained by RGD
+
 Jun 14, 2022
   tuned up logging
 
