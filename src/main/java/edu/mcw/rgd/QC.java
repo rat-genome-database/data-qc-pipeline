@@ -26,6 +26,7 @@ public class QC {
 
     Logger log = LogManager.getLogger("status");
     Logger logQtls = LogManager.getLogger("qtls_with_inactive_markers");
+    Logger logOrphanTerms = LogManager.getLogger("orphan_terms");
     Logger logRelatedQtls = LogManager.getLogger("related_qtls");
     Logger logDuplicateAlleles = LogManager.getLogger("duplicate_alleles");
 
@@ -336,12 +337,14 @@ public class QC {
 
         log.info("");
         log.info("ORPHAN TERMS:");
-        // currently check ontologies maintained by RGD
+        // currently check only ontologies maintained by RGD
         String[] ontIds = {"RDO", "RS", "CMO", "MMO", "XCO", "PW"};
         for( String ontId: ontIds ) {
             List<String> orphanTermAccs = dao.getOrphanTerms(ontId);
             if( !orphanTermAccs.isEmpty() ) {
-                log.info("    "+ontId+": "+Utils.concatenate(orphanTermAccs,", "));
+                String msg = "    "+ontId+": "+Utils.concatenate(orphanTermAccs,", ");
+                log.info(msg);
+                logOrphanTerms.info(msg);
             }
         }
     }
