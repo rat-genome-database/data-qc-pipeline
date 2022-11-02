@@ -503,7 +503,8 @@ public class QC {
                 XdbId xdbId = new XdbId();
                 xdbId.setAccId(rrrcId.substring(5).trim());
                 xdbId.setRgdId(alias.getRgdId());
-                xdbId.setSrcPipeline("DATAQC");
+                xdbId.setSrcPipeline("RGD");
+                xdbId.setNotes("created by data-qc-pipeline");
                 xdbId.setXdbKey(XDB_KEY_RRRC);
                 xdbId.setLinkText(rrrcId);
                 xdbId.setCreationDate(new Date());
