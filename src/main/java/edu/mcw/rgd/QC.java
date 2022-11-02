@@ -485,6 +485,10 @@ public class QC {
         for( Alias alias: aliases ) {
 
             String rrrcId = alias.getValue().trim();
+            if( !rrrcId.startsWith("RRRC:") ) {
+                logRrrcIds.info("  SKIPPING! alias must start with 'RRRC:' (alias = ["+rrrcId+"])");
+                continue;
+            }
             boolean rrrcIdIsAlreadyInRgd = false;
             List<XdbId> rrrcIdsInRgd = dao.getXdbIdsByRgdId(XDB_KEY_RRRC, alias.getRgdId(), RgdId.OBJECT_KEY_STRAINS);
             for( XdbId xdbId: rrrcIdsInRgd ) {
