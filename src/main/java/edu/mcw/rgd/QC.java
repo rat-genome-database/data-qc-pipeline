@@ -484,10 +484,11 @@ public class QC {
 
         for( Alias alias: aliases ) {
 
+            String rrrcId = alias.getValue().trim();
             boolean rrrcIdIsAlreadyInRgd = false;
             List<XdbId> rrrcIdsInRgd = dao.getXdbIdsByRgdId(XDB_KEY_RRRC, alias.getRgdId(), RgdId.OBJECT_KEY_STRAINS);
             for( XdbId xdbId: rrrcIdsInRgd ) {
-                if( Utils.stringsAreEqual(xdbId.getLinkText(), alias.getValue()) ) {
+                if( Utils.stringsAreEqual(xdbId.getLinkText(), rrrcId) ) {
                     rrrcIdIsAlreadyInRgd = true;
                     break;
                 }
@@ -496,10 +497,11 @@ public class QC {
                 rrrcIdsAlreadyInRgd++;
             } else {
                 XdbId xdbId = new XdbId();
-                xdbId.setAccId(alias.getValue().substring(5).trim());
+                xdbId.setAccId(rrrcId.substring(5).trim());
                 xdbId.setRgdId(alias.getRgdId());
                 xdbId.setSrcPipeline("DATAQC");
                 xdbId.setXdbKey(XDB_KEY_RRRC);
+                xdbId.setLinkText(rrrcId);
                 xdbId.setCreationDate(new Date());
                 xdbId.setModificationDate(new Date());
                 xdbIdsForInsert.add(xdbId);
