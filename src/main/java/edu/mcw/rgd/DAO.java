@@ -1,10 +1,7 @@
 package edu.mcw.rgd;
 
 import edu.mcw.rgd.dao.impl.*;
-import edu.mcw.rgd.dao.spring.EvidenceQuery;
-import edu.mcw.rgd.dao.spring.IntListQuery;
-import edu.mcw.rgd.dao.spring.IntStringMapQuery;
-import edu.mcw.rgd.dao.spring.StringListQuery;
+import edu.mcw.rgd.dao.spring.*;
 import edu.mcw.rgd.dao.spring.ontologyx.TermSynonymQuery;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.annotation.Evidence;
@@ -54,6 +51,13 @@ public class DAO {
         aliasDAO.deleteAliases(aliasesForDelete);
         // aliasDAO.deleteAliases() returns count of rows deleted, but it is buggy: the count is negative, and double the actual count
         return aliasesForDelete.size();
+    }
+
+    public List<Alias> findAliases(int objectKey, int speciesTypeKey, String valueMask) throws Exception {
+        String searchValue = "%"+valueMask.toLowerCase()+"%";
+        String sql = "SELECT * FROM aliases a,rgd_ids i WHERE alias_value_lc LIKE ? AND a.rgd_id=i.rgd_id AND i.object_key=? AND i.species_type_key=? AND object_status='ACTIVE'";
+        AliasQuery q = new AliasQuery(adao.getDataSource(), sql);
+        return aliasDAO.execute(q, searchValue, objectKey, speciesTypeKey);
     }
 
     public List<Annotation> getAnnotationsWithNewLinesInNotes() throws Exception {
@@ -264,6 +268,10 @@ public class DAO {
     public int insertXdbIds(List<XdbId> xdbIds) throws Exception {
         xdao.insertXdbs(xdbIds);
         return xdbIds.size();
+    }
+
+    public List<XdbId> getXdbIdsByRgdId(int xdbKey, int rgdId, int objectKey) throws Exception {
+        return xdao.getXdbIdsByRgdId(xdbKey, rgdId, objectKey);
     }
 
     public List<GenomicElement []> getGeneAllelesWithSameSymbols() throws Exception {

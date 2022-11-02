@@ -1,3 +1,6 @@
+Nov 02, 2022
+  added qc of RRRC IDs for strains
+
 Jul 19, 2022
   added reporting of orphan terms in ontologies maintained by RGD
 

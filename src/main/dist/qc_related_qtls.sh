@@ -18,7 +18,7 @@ cd $APPDIR
 $APPDIR/run.sh --related_qtls
 
 if [ -s logs/related_qtls_summary.log ]; then
-  mailx -s "[$SERVER] related qtls with missing RGD_REF_RGD_ID entries" $EMAIL_LIST < logs/related_qtls_summary.log.log
+  mailx -s "[$SERVER] related qtls with missing RGD_REF_RGD_ID entries" $EMAIL_LIST < logs/related_qtls_summary.log
 fi
 
 

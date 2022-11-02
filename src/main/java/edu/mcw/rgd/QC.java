@@ -29,6 +29,7 @@ public class QC {
     Logger logOrphanTerms = LogManager.getLogger("orphan_terms");
     Logger logRelatedQtls = LogManager.getLogger("related_qtls");
     Logger logDuplicateAlleles = LogManager.getLogger("duplicate_alleles");
+    Logger logRrrcIds = LogManager.getLogger("rrrc_ids");
 
     public static void main(String[] args) throws Exception {
 
@@ -62,6 +63,7 @@ public class QC {
         boolean qcInactiveObjects = false;
         boolean qcOrphanTerms = false;
         boolean qcRelatedQtls = false;
+        boolean qcRrrcIds = false;
         boolean qcRsOntology = false;
         boolean qcSequences = false;
         boolean qcTranscripts = false;
@@ -95,6 +97,9 @@ public class QC {
                     break;
                 case "--related_qtls":
                     qcRelatedQtls = true;
+                    break;
+                case "--rrrc_ids":
+                    qcRrrcIds = true;
                     break;
                 case "--rs_ontology":
                     qcRsOntology = true;
@@ -131,16 +136,20 @@ public class QC {
             qcActiveQtlsWithInactiveMarkers();
         }
 
+        if( qcOrphanTerms || qcAll ) {
+            qcOrphanTerms();
+        }
+
         if( qcRelatedQtls || qcAll ) {
             qcRelatedQtls();
         }
 
-        if( qcRsOntology || qcAll ) {
-            qcRsOntology();
+        if( qcRrrcIds || qcAll ) {
+            qcRrrcIds();
         }
 
-        if( qcOrphanTerms || qcAll ) {
-            qcOrphanTerms();
+        if( qcRsOntology || qcAll ) {
+            qcRsOntology();
         }
 
         if( qcSequences || qcAll ) {
@@ -462,6 +471,50 @@ public class QC {
         log.info("INSERTED NCBI NUCLEOTIDE XDB IDS FOR TRANSCRIPTS: "+xdbIdsInserted);
     }
 
+    void qcRrrcIds() throws Exception {
+
+        log.info("");
+
+        final int XDB_KEY_RRRC = 141;
+
+        List<Alias> aliases = dao.findAliases(RgdId.OBJECT_KEY_STRAINS, SpeciesType.RAT, "RRRC:");
+        logRrrcIds.info("found strain aliases with RRRC ids: "+aliases.size());
+        int rrrcIdsAlreadyInRgd = 0;
+        List<XdbId> xdbIdsForInsert = new ArrayList<>();
+
+        for( Alias alias: aliases ) {
+
+            boolean rrrcIdIsAlreadyInRgd = false;
+            List<XdbId> rrrcIdsInRgd = dao.getXdbIdsByRgdId(XDB_KEY_RRRC, alias.getRgdId(), RgdId.OBJECT_KEY_STRAINS);
+            for( XdbId xdbId: rrrcIdsInRgd ) {
+                if( Utils.stringsAreEqual(xdbId.getLinkText(), alias.getValue()) ) {
+                    rrrcIdIsAlreadyInRgd = true;
+                    break;
+                }
+            }
+            if( rrrcIdIsAlreadyInRgd ) {
+                rrrcIdsAlreadyInRgd++;
+            } else {
+                XdbId xdbId = new XdbId();
+                xdbId.setAccId(alias.getValue().substring(5).trim());
+                xdbId.setRgdId(alias.getRgdId());
+                xdbId.setSrcPipeline("DATAQC");
+                xdbId.setXdbKey(XDB_KEY_RRRC);
+                xdbId.setCreationDate(new Date());
+                xdbId.setModificationDate(new Date());
+                xdbIdsForInsert.add(xdbId);
+                logRrrcIds.info("  inserting "+xdbId.dump("|"));
+            }
+        }
+
+        if( !xdbIdsForInsert.isEmpty() ) {
+            dao.insertXdbIds(xdbIdsForInsert);
+            logRrrcIds.info("RRRC IDS from ALIASES table inserted as XDB IDS: "+xdbIdsForInsert.size());
+        }
+        logRrrcIds.info("RRRC IDS from ALIASES table already in RGD as XDB IDS: "+rrrcIdsAlreadyInRgd);
+
+        log.info("QC of RRRC IDs from ALIASES table OK -- processed "+aliases.size()+" aliases, xdb ids inserted: "+xdbIdsForInsert.size());
+    }
 
 
     public void setVersion(String version) {

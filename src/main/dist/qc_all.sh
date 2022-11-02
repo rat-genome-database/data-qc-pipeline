@@ -53,3 +53,7 @@ fi
 if [ -s logs/orphan_terms_summary.log ]; then
   mailx -s "[$SERVER] orphan terms" mtutaj@mcw.edu < logs/orphan_terms_summary.log
 fi
+
+if [ -s logs/rrrc_ids_summary.log ]; then
+  mailx -s "[$SERVER] RRRC IDs QC report" $ALLELE_EMAIL_LIST < logs/rrrc_ids_summary.log
+fi
