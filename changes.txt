@@ -1,3 +1,6 @@
+Jan 11, 2023
+  updated build.gradle to be gradle 6.x + compatible
+
 Nov 02, 2022
   added qc of RRRC IDs for strains
 
