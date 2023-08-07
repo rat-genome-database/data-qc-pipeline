@@ -3,7 +3,7 @@
 # Data QC pipeline
 #
 . /etc/profile
-APPNAME=DataQCPipeline
+APPNAME=data-qc-pipeline
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 
 APPDIR=/home/rgddata/pipelines/$APPNAME

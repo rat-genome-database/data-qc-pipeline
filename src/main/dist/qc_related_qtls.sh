@@ -4,7 +4,7 @@
 #    what means, that on qtl report page, references listed in section 'Related Qtls' must be also listed in section 'Curated References'
 #
 . /etc/profile
-APPNAME=DataQCPipeline
+APPNAME=data-qc-pipeline
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 
 EMAIL_LIST=mtutaj@mcw.edu

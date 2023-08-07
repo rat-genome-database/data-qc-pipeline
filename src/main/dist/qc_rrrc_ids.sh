@@ -3,7 +3,7 @@
 # Data QC pipeline: examine RRRC ID strain aliases and add them as XDB IDS if not present
 #
 . /etc/profile
-APPNAME=DataQCPipeline
+APPNAME=data-qc-pipeline
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 
 EMAIL_LIST=mtutaj@mcw.edu
