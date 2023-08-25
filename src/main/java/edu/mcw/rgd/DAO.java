@@ -31,6 +31,7 @@ public class DAO {
     OntologyXDAO odao = new OntologyXDAO();
     QTLDAO qdao = new QTLDAO();
     ReferenceDAO rdao = new ReferenceDAO();
+    StrainDAO strainDAO = assocDAO.getStrainDAO();
     XdbIdDAO xdao = new XdbIdDAO();
 
     Logger logUpdatedAnnots = LogManager.getLogger("updatedAnnots");
@@ -328,5 +329,13 @@ public class DAO {
             }
         }
         return result;
+    }
+
+    public List<Strain> getActiveStrains() throws Exception {
+        return strainDAO.getActiveStrains();
+    }
+
+    public void updateStrain( Strain strain ) throws Exception {
+        strainDAO.updateStrain(strain);
     }
 }

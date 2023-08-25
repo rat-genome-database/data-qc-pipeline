@@ -66,6 +66,7 @@ public class QC {
         boolean qcRrrcIds = false;
         boolean qcRsOntology = false;
         boolean qcSequences = false;
+        boolean qcStrains = true;
         boolean qcTranscripts = false;
 
         // no arguments means to run all qc types
@@ -106,6 +107,9 @@ public class QC {
                     break;
                 case "--sequences":
                     qcSequences = true;
+                    break;
+                case "--strains":
+                    qcStrains = true;
                     break;
                 case "--transcripts":
                     qcTranscripts = true;
@@ -154,6 +158,10 @@ public class QC {
 
         if( qcSequences || qcAll ) {
             qcSequences();
+        }
+
+        if( qcStrains || qcAll ) {
+            qcStrains();
         }
 
         if( qcTranscripts || qcAll ) {
@@ -521,6 +529,57 @@ public class QC {
         logRrrcIds.info("RRRC IDS from ALIASES table already in RGD as XDB IDS: "+rrrcIdsAlreadyInRgd);
 
         log.info("QC of RRRC IDs from ALIASES table OK -- processed "+aliases.size()+" aliases, xdb ids inserted: "+xdbIdsForInsert.size());
+    }
+
+    public void qcStrains() throws Exception {
+
+        log.info("");
+
+        // strain_symbol:      WAG-<i>Cd247<sup>em9Mcwi</sup></i>
+        // tagless_strain_symbol:   WAG-Cd247^[em9Mcwi]
+        // In other words: '^[ ]'  should be used to replace the tags '<sup>' and </sup>' and tags<i></i> must be ignored
+
+
+        List<Strain> strains = dao.getActiveStrains();
+        Collections.shuffle(strains);
+        int taglessStrainSymbolUpdated = 0;
+        for( Strain s: strains ) {
+
+            String taglessSymbol = generateTaglessSymbol(s.getSymbol());
+            if( !Utils.stringsAreEqual(taglessSymbol, s.getTaglessStrainSymbol()) ) {
+                s.setTaglessStrainSymbol(taglessSymbol);
+                dao.updateStrain(s);
+                taglessStrainSymbolUpdated++;
+            }
+        }
+
+        log.info("QC of strains OK -- processed "+strains.size()+" strains, tagless strain symbols updated: "+taglessStrainSymbolUpdated);
+    }
+
+    String generateTaglessSymbol( String symbol ) {
+
+        for( ;; ) {
+
+            int tagStartPos = symbol.indexOf('<');
+            int tagStopPos = symbol.indexOf('>');
+            if( tagStartPos<0 || tagStopPos<0 || tagStartPos>tagStopPos ) {
+                break;
+            }
+
+            // we have a tag!
+            String tag = symbol.substring(tagStartPos+1, tagStopPos).trim().toLowerCase();
+            String replacement = "";
+            if( tag.equals("sup") ) {
+                replacement = "^[";
+            }
+            else if( tag.equals("/sup") ) {
+                replacement = "]";
+            }
+
+            symbol = symbol.substring(0, tagStartPos) + replacement + symbol.substring(tagStopPos+1);
+        }
+
+        return symbol;
     }
 
 
