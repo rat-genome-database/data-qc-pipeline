@@ -28,6 +28,7 @@ public class DAO {
     AliasDAO aliasDAO = new AliasDAO();
     AnnotationDAO adao = new AnnotationDAO();
     AssociationDAO assocDAO = new AssociationDAO();
+    GeneDAO geneDAO = assocDAO.getGeneDAO();
     OntologyXDAO odao = new OntologyXDAO();
     QTLDAO qdao = new QTLDAO();
     ReferenceDAO rdao = new ReferenceDAO();
@@ -337,5 +338,17 @@ public class DAO {
 
     public void updateStrain( Strain strain ) throws Exception {
         strainDAO.updateStrain(strain);
+    }
+
+    public List<Gene> getGenesByType(String geneType) throws Exception {
+
+        String query = "SELECT g.*, i.species_type_key FROM genes g, rgd_ids i " +
+                "WHERE g.rgd_id=i.rgd_id AND gene_type_lc=LOWER(?)";
+
+        return GeneQuery.execute(geneDAO, query, geneType);
+    }
+
+    public void updateGene( Gene gene ) throws Exception {
+        geneDAO.updateGene(gene);
     }
 }

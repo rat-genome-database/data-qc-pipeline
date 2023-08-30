@@ -1,5 +1,8 @@
+Aug 30, 2023
+  added computation of TAGLESS_ALLELE_SYMBOL for gene alleles
+
 Aug 24, 2023
-  renamed to 'data-qc-pipeline'
+  added computation of TAGLESS_STRAIN_SYMBOL for strains
 
 Aug 07, 2023
   renamed to 'data-qc-pipeline'

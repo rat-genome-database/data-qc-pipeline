@@ -57,8 +57,8 @@ public class QC {
 
         boolean qcAll = false;
         boolean qcAliases = false;
+        boolean qcAlleles = false;
         boolean qcAnnotations = false;
-        boolean qcDuplicateAlleles = false;
         boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
         boolean qcOrphanTerms = false;
@@ -81,8 +81,8 @@ public class QC {
                 case "--aliases":
                     qcAliases = true;
                     break;
-                case "--duplicate_alleles":
-                    qcDuplicateAlleles = true;
+                case "--alleles":
+                    qcAlleles = true;
                     break;
                 case "--annotations":
                     qcAnnotations = true;
@@ -128,7 +128,7 @@ public class QC {
             qcAnnotationsWithInactiveReferences();
         }
 
-        if( qcDuplicateAlleles || qcAll ) {
+        if( qcAlleles || qcAll ) {
             qcAlleles();
         }
 
@@ -172,12 +172,36 @@ public class QC {
 
     void qcAlleles() throws Exception {
 
+        // qc duplicate alleles
         log.info("");
         List<GenomicElement[]> results = dao.getGeneAllelesWithSameSymbols();
         dumpDuplicateAlleles("GENE ALLELES WITH DUPLICATE SYMBOLS: ", results);
 
         results = dao.getGeneAllelesWithSameNames();
         dumpDuplicateAlleles("GENE ALLELES WITH DUPLICATE NAMES: ", results);
+
+
+        // qc tagless allele symbols
+        log.info("");
+
+        // allele_symbol:      Egln3<i><sup>m1Mcwi</sup></i>
+        // tagless_allele_symbol:   Egln3^[m1Mcwi]
+        // In other words: '^[ ]'  should be used to replace the tags '<sup>' and </sup>' and tags<i></i> must be ignored
+
+        List<Gene> alleles = dao.getGenesByType("allele");
+        Collections.shuffle(alleles);
+        int taglessAlleleSymbolUpdated = 0;
+        for( Gene g: alleles ) {
+
+            String taglessSymbol = generateTaglessSymbol(g.getSymbol());
+            if( !Utils.stringsAreEqual(taglessSymbol, g.getTaglessAlleleSymbol()) ) {
+                g.setTaglessAlleleSymbol(taglessSymbol);
+                dao.updateGene(g);
+                taglessAlleleSymbolUpdated++;
+            }
+        }
+
+        log.info("QC of gene alleles OK -- processed "+alleles.size()+" alleles, tagless allele symbols updated: "+taglessAlleleSymbolUpdated);
     }
 
     void dumpDuplicateAlleles(String title, List<GenomicElement[]> results) {
