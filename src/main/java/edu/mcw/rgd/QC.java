@@ -66,7 +66,7 @@ public class QC {
         boolean qcRrrcIds = false;
         boolean qcRsOntology = false;
         boolean qcSequences = false;
-        boolean qcStrains = true;
+        boolean qcStrains = false;
         boolean qcTranscripts = false;
 
         // no arguments means to run all qc types
