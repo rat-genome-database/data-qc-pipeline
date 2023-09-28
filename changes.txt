@@ -1,3 +1,6 @@
+Sep 28, 2023
+  added reporting of phenotypic allelic variants with same names
+
 Aug 30, 2023
   added computation of TAGLESS_ALLELE_SYMBOL for gene alleles
 

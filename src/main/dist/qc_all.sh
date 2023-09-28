@@ -12,7 +12,7 @@ MMO_EMAIL_LIST=mtutaj@mcw.edu
 INACTIVE_IDS_EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
     EMAIL_LIST=mtutaj@mcw.edu,slaulede@mcw.edu,jrsmith@mcw.edu
-    ALLELE_EMAIL_LIST=mtutaj@mcw.edu,sjwang@mcw.edu
+    ALLELE_EMAIL_LIST=mtutaj@mcw.edu,sjwang@mcw.edu,jrsmith
     MMO_EMAIL_LIST=mtutaj@mcw.edu,jrsmith@mcw.edu
     INACTIVE_IDS_EMAIL_LIST=sjwang@mcw.edu,gthayman@mcw.edu,mtutaj@mcw.edu
 fi
@@ -47,6 +47,11 @@ fi
 # if there are gene alleles having the same symbols or names, email them
 if [ -s logs/duplicate_alleles_simple.log ]; then
   mailx -s "[$SERVER] duplicate gene alleles" $ALLELE_EMAIL_LIST < logs/duplicate_alleles_simple.log
+fi
+
+# if there are phenotypic variants with same names, report them by email
+if [ -s logs/duplicate_variants_simple.log ]; then
+  mailx -s "[$SERVER] duplicate variant names" $ALLELE_EMAIL_LIST < logs/duplicate_variants_simple.log
 fi
 
 # if there are gene alleles having the same symbols or names, email them

@@ -29,6 +29,7 @@ public class QC {
     Logger logOrphanTerms = LogManager.getLogger("orphan_terms");
     Logger logRelatedQtls = LogManager.getLogger("related_qtls");
     Logger logDuplicateAlleles = LogManager.getLogger("duplicate_alleles");
+    Logger logDuplicateVariants = LogManager.getLogger("duplicate_variants");
     Logger logRrrcIds = LogManager.getLogger("rrrc_ids");
 
     public static void main(String[] args) throws Exception {
@@ -68,8 +69,9 @@ public class QC {
         boolean qcSequences = false;
         boolean qcStrains = false;
         boolean qcTranscripts = false;
+        boolean qcVariants = false;
 
-        // no arguments means to run all qc types
+        // no arguments defaults to run all qc types
         if( args.length==0 ) {
             args = new String[]{"--all"};
         }
@@ -113,6 +115,9 @@ public class QC {
                     break;
                 case "--transcripts":
                     qcTranscripts = true;
+                    break;
+                case "--variants":
+                    qcVariants = true;
                     break;
             }
         }
@@ -166,6 +171,10 @@ public class QC {
 
         if( qcTranscripts || qcAll ) {
             qcTranscripts();
+        }
+
+        if( qcVariants || qcAll ) {
+            qcVariants();
         }
         log.info("=== OK -- elapsed time "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
     }
@@ -606,6 +615,29 @@ public class QC {
         return symbol;
     }
 
+    void qcVariants() throws Exception {
+
+        // display phenotypic variants with same names
+        log.info("");
+
+        List<String> results = dao.getVariantsWithSameNames();
+
+        String msg = "Phenotypic allelic variants with same names: " + results.size();
+        log.info(msg);
+        logDuplicateVariants.info(msg);
+
+        if( !results.isEmpty() ) {
+            log.info("===");
+            for (String s : results) {
+                log.info(s);
+                logDuplicateVariants.info(s);
+            }
+            log.info("===");
+            logDuplicateVariants.info("===");
+        }
+
+        log.info("QC of phenotypic allelic variants with same names OK -- problems found: "+results.size());
+    }
 
     public void setVersion(String version) {
         this.version = version;

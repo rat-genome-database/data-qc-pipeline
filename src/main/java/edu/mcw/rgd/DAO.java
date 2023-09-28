@@ -332,6 +332,16 @@ public class DAO {
         return result;
     }
 
+    public List<String> getVariantsWithSameNames() throws Exception {
+        String sql = "SELECT 'NAME: ['||v1.name||'] RGD ID1='||v1.rgd_id||', RGD ID2='||v2.rgd_id \n" +
+                "FROM variants v1,variants v2,rgd_ids i1,rgd_ids i2 \n" +
+                "WHERE v1.rgd_id<v2.rgd_id AND v1.name=v2.name \n" +
+                "  AND i1.rgd_id=v1.rgd_id AND i2.rgd_id=v2.rgd_id\n" +
+                "  AND i1.object_status='ACTIVE' AND i2.object_status='ACTIVE'";
+
+        return StringListQuery.execute(strainDAO, sql);
+    }
+
     public List<Strain> getActiveStrains() throws Exception {
         return strainDAO.getActiveStrains();
     }
