@@ -1,3 +1,6 @@
+Jan 29, 2024
+  updated to java 17
+
 Sep 28, 2023
   added reporting of phenotypic allelic variants with same names
 
