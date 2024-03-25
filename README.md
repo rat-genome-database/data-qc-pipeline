@@ -28,8 +28,11 @@ General purpose qc reports on data integrity.
     2. show integrity issues for uniprot sequences (there should be only one sequence
        of type 'uniprot_seq' per RGD_ID)
 
-5. TRANSCRIPTS
+5. GENES
+    1. remove all characters with ASCII code > 127 from gene symbols
+   
+6. TRANSCRIPTS
     1. display orphaned transcript rgd ids (transcript rgd ids that are active in RGD_IDS table, but which do not have
        corresponding entries in TRANSCRIPTS table)
-        2. create NCBI nucleotide xdb ids for transcripts missing them
-           (usually for transcripts that are active on older assembly, but discontinued on new assembly)
+    2. create NCBI nucleotide xdb ids for transcripts missing them
+       (usually for transcripts that are active on older assembly, but discontinued on new assembly)

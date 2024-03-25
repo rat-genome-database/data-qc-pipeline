@@ -361,4 +361,16 @@ public class DAO {
     public void updateGene( Gene gene ) throws Exception {
         geneDAO.updateGene(gene);
     }
+
+    public List<IntStringMapQuery.MapPair> getGeneSymbols( int speciesTypeKey ) throws Exception {
+
+        String sql = "SELECT g.rgd_id,gene_symbol FROM genes g,rgd_id i WHERE g.rgd_id=i.rgd_id AND species_type_key=?";
+        return IntStringMapQuery.execute(geneDAO, sql, speciesTypeKey);
+    }
+
+    public int updateGeneSymbol( int rgdId, String oldGeneSymbol, String newGeneSymbol ) throws Exception {
+
+        String sql = "UPDATE genes SET gene_symbol=?,gene_symbol_lc=LOWER(?) WHERE rgd_id=? AND gene_symbol=?";
+        return geneDAO.update(newGeneSymbol, newGeneSymbol, rgdId, oldGeneSymbol);
+    }
 }

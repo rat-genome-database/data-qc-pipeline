@@ -60,6 +60,7 @@ public class QC {
         boolean qcAliases = false;
         boolean qcAlleles = false;
         boolean qcAnnotations = false;
+        boolean qcGenes = false;
         boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
         boolean qcOrphanTerms = false;
@@ -88,6 +89,9 @@ public class QC {
                     break;
                 case "--annotations":
                     qcAnnotations = true;
+                    break;
+                case "--genes":
+                    qcGenes = true;
                     break;
                 case "--hgncId":
                     qcHgncIds = true;
@@ -135,6 +139,10 @@ public class QC {
 
         if( qcAlleles || qcAll ) {
             qcAlleles();
+        }
+
+        if( qcGenes || qcAll ) {
+            qcGenes();
         }
 
         if( qcHgncIds || qcAll ) {
@@ -232,6 +240,54 @@ public class QC {
             log.info("===");
             logDuplicateAlleles.info("===");
         }
+    }
+
+    void qcGenes() throws Exception {
+
+        log.info("");
+        log.info("GENE SYMBOLS: removing ASCII characters > 127");
+
+        Logger logGeneSymbols = LogManager.getLogger("gene_symbols");
+
+        int totalSymbolsSanitized = 0;
+
+        for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
+            if( !SpeciesType.isSearchable(speciesTypeKey) ) {
+                continue;
+            }
+            String species = SpeciesType.getCommonName(speciesTypeKey);
+
+            int symbolsUpdated = 0;
+
+            List<IntStringMapQuery.MapPair> list = dao.getGeneSymbols(speciesTypeKey);
+            for( IntStringMapQuery.MapPair pair: list ) {
+                int rgdId = pair.keyValue;
+                String oldSymbol = pair.stringValue;
+
+                for (int i = 0; i < oldSymbol.length(); i++) {
+                    if (oldSymbol.codePointAt(i) > 127) {
+                        StringBuffer buf = new StringBuffer(oldSymbol);
+                        buf.deleteCharAt(i);
+                        String newSymbol = buf.toString();
+                        dao.updateGeneSymbol(rgdId, oldSymbol, newSymbol);
+
+                        logGeneSymbols.debug("SPECIES: "+species+" RGD:"+rgdId
+                                +" OLD SYMBOL=["+oldSymbol+"]  NEW SYMBOL=["+newSymbol+"]");
+
+                        symbolsUpdated++;
+                        break;
+                    }
+                }
+            }
+
+            totalSymbolsSanitized += symbolsUpdated;
+
+            if( symbolsUpdated>0 ) {
+                log.info("   " + species + "  genes: " + list.size() + "  sanitized: " + symbolsUpdated);
+            }
+        }
+
+        log.info("total gene symbols sanitized: " + totalSymbolsSanitized);
     }
 
     void qcHgncIds() throws Exception {
