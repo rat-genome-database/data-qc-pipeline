@@ -364,7 +364,7 @@ public class DAO {
 
     public List<IntStringMapQuery.MapPair> getGeneSymbols( int speciesTypeKey ) throws Exception {
 
-        String sql = "SELECT g.rgd_id,gene_symbol FROM genes g,rgd_id i WHERE g.rgd_id=i.rgd_id AND species_type_key=?";
+        String sql = "SELECT g.rgd_id,gene_symbol FROM genes g,rgd_ids i WHERE g.rgd_id=i.rgd_id AND species_type_key=? AND object_status='ACTIVE'";
         return IntStringMapQuery.execute(geneDAO, sql, speciesTypeKey);
     }
 
