@@ -368,9 +368,27 @@ public class DAO {
         return IntStringMapQuery.execute(geneDAO, sql, speciesTypeKey);
     }
 
-    public int updateGeneSymbol( int rgdId, String oldGeneSymbol, String newGeneSymbol ) throws Exception {
+    public int updateGeneSymbol( int rgdId, String oldSymbol, String newSymbol ) throws Exception {
+
+        Logger log = LogManager.getLogger("gene_symbols");
+        log.debug("GENE RGD:"+rgdId +"  OLD SYMBOL=["+oldSymbol+"]  NEW SYMBOL=["+newSymbol+"]");
 
         String sql = "UPDATE genes SET gene_symbol=?,gene_symbol_lc=LOWER(?) WHERE rgd_id=? AND gene_symbol=?";
-        return geneDAO.update(sql, newGeneSymbol, newGeneSymbol, rgdId, oldGeneSymbol);
+        return geneDAO.update(sql, newSymbol, newSymbol, rgdId, oldSymbol);
+    }
+
+    public List<IntStringMapQuery.MapPair> getGeneNames( int speciesTypeKey ) throws Exception {
+
+        String sql = "SELECT g.rgd_id,full_name FROM genes g,rgd_ids i WHERE g.rgd_id=i.rgd_id AND species_type_key=? AND object_status='ACTIVE'";
+        return IntStringMapQuery.execute(geneDAO, sql, speciesTypeKey);
+    }
+
+    public int updateGeneName( int rgdId, String oldName, String newName ) throws Exception {
+
+        Logger log = LogManager.getLogger("gene_names");
+        log.debug("GENE RGD:"+rgdId +"  OLD NAME=["+oldName+"]  NEW NAME=["+newName+"]");
+
+        String sql = "UPDATE genes SET full_name=?,full_name_lc=LOWER(?) WHERE rgd_id=? AND full_name=?";
+        return geneDAO.update(sql, newName, newName, rgdId, oldName);
     }
 }

@@ -29,7 +29,7 @@ General purpose qc reports on data integrity.
        of type 'uniprot_seq' per RGD_ID)
 
 5. GENES
-    1. remove all characters with ASCII code > 127 from gene symbols
+    1. remove all characters with ASCII code > 127 from gene symbols and names
    
 6. TRANSCRIPTS
     1. display orphaned transcript rgd ids (transcript rgd ids that are active in RGD_IDS table, but which do not have

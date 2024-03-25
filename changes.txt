@@ -1,6 +1,6 @@
 Mar 25, 2024
-  added sanitation of gene symbols for all species
-    (characters with ASCII code > 127 are removed from gene symbols)
+  added sanitation of gene symbols and names for all species
+    (characters with ASCII code > 127 are removed from gene symbols and names)
 
 Feb 13, 2024
   renamed 'master' to 'main'

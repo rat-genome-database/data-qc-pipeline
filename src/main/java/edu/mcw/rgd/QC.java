@@ -245,9 +245,42 @@ public class QC {
     void qcGenes() throws Exception {
 
         log.info("");
-        log.info("GENE SYMBOLS: removing ASCII characters > 127");
+        log.info("GENE NAMES/SYMBOLS: removing ASCII characters > 127");
 
-        Logger logGeneSymbols = LogManager.getLogger("gene_symbols");
+        int totalNamesSanitized = 0;
+
+        for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
+            if( !SpeciesType.isSearchable(speciesTypeKey) ) {
+                continue;
+            }
+            String species = SpeciesType.getCommonName(speciesTypeKey);
+
+            int namesUpdated = 0;
+
+            List<IntStringMapQuery.MapPair> list = dao.getGeneNames(speciesTypeKey);
+            for( IntStringMapQuery.MapPair pair: list ) {
+                int rgdId = pair.keyValue;
+                String oldName = pair.stringValue;
+                if( oldName != null ) {
+                    String newName = sanitizeWhitespaceAndNBSP(oldName);
+                    if (!oldName.equals(newName)) {
+                        dao.updateGeneName(rgdId, oldName, newName);
+
+                        namesUpdated++;
+                        break;
+                    }
+                }
+            }
+
+            totalNamesSanitized += namesUpdated;
+
+            if( namesUpdated>0 ) {
+                log.info("   " + species + "  genes: " + list.size() + "  sanitized: " + namesUpdated);
+            }
+        }
+
+        log.info(" total gene names sanitized: " + totalNamesSanitized);
+
 
         int totalSymbolsSanitized = 0;
 
@@ -264,19 +297,12 @@ public class QC {
                 int rgdId = pair.keyValue;
                 String oldSymbol = pair.stringValue;
 
-                for (int i = 0; i < oldSymbol.length(); i++) {
-                    if (oldSymbol.codePointAt(i) > 127) {
-                        StringBuffer buf = new StringBuffer(oldSymbol);
-                        buf.deleteCharAt(i);
-                        String newSymbol = buf.toString();
-                        dao.updateGeneSymbol(rgdId, oldSymbol, newSymbol);
+                String newSymbol = sanitizeWhitespaceAndNBSP(oldSymbol);
+                if (!oldSymbol.equals(newSymbol)) {
+                    dao.updateGeneSymbol(rgdId, oldSymbol, newSymbol);
 
-                        logGeneSymbols.debug("SPECIES: "+species+" RGD:"+rgdId
-                                +" OLD SYMBOL=["+oldSymbol+"]  NEW SYMBOL=["+newSymbol+"]");
-
-                        symbolsUpdated++;
-                        break;
-                    }
+                    symbolsUpdated++;
+                    break;
                 }
             }
 
@@ -287,7 +313,20 @@ public class QC {
             }
         }
 
-        log.info("total gene symbols sanitized: " + totalSymbolsSanitized);
+        log.info(" total gene symbols sanitized: " + totalSymbolsSanitized);
+    }
+
+    String sanitizeWhitespaceAndNBSP( String str ) {
+
+        String newStr = str;
+        for (int i = 0; i < str.length(); i++) {
+            if (str.codePointAt(i) > 127) {
+
+                newStr = str.replace( str.charAt(i), ' ').trim();
+                break;
+            }
+        }
+        return newStr;
     }
 
     void qcHgncIds() throws Exception {
