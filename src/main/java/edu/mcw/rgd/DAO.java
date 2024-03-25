@@ -371,6 +371,6 @@ public class DAO {
     public int updateGeneSymbol( int rgdId, String oldGeneSymbol, String newGeneSymbol ) throws Exception {
 
         String sql = "UPDATE genes SET gene_symbol=?,gene_symbol_lc=LOWER(?) WHERE rgd_id=? AND gene_symbol=?";
-        return geneDAO.update(newGeneSymbol, newGeneSymbol, rgdId, oldGeneSymbol);
+        return geneDAO.update(sql, newGeneSymbol, newGeneSymbol, rgdId, oldGeneSymbol);
     }
 }
