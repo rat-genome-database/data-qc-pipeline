@@ -1,3 +1,7 @@
+Mar 26, 2024
+  removed checking for non-ASCII characters in gene names and symbols:
+    non-ASCII characters are now forbidden in gene names and symbols via enforced Oracle constraints
+
 Mar 25, 2024
   added sanitation of gene symbols and names for all species
     (characters with ASCII code > 127 are removed from gene symbols and names)

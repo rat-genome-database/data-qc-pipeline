@@ -123,18 +123,6 @@
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
         </RollingFile>
-        <RollingFile name="gene_symbols" append="true" fileName="logs/gene_symbols.log" filePattern="logs/gene_symbols.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy interval="1"/>
-            </Policies>
-        </RollingFile>
-        <RollingFile name="gene_names" append="true" fileName="logs/gene_names.log" filePattern="logs/gene_names.log.%d{yyyy-MM}">
-            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy interval="1"/>
-            </Policies>
-        </RollingFile>
     </Appenders>
 
     <Loggers>
@@ -195,14 +183,6 @@
         <Logger name="rrrc_ids" level="debug" additivity="false">
             <AppenderRef ref="rrrc_ids"/>
             <AppenderRef ref="rrrc_ids_summary"/>
-            <AppenderRef ref="Console" level="info"/>
-        </Logger>
-        <Logger name="gene_symbols" level="debug" additivity="false">
-            <AppenderRef ref="gene_symbols"/>
-            <AppenderRef ref="Console" level="info"/>
-        </Logger>
-        <Logger name="gene_names" level="debug" additivity="false">
-            <AppenderRef ref="gene_names"/>
             <AppenderRef ref="Console" level="info"/>
         </Logger>
     </Loggers>

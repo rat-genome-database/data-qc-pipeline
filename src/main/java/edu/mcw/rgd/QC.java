@@ -60,7 +60,6 @@ public class QC {
         boolean qcAliases = false;
         boolean qcAlleles = false;
         boolean qcAnnotations = false;
-        boolean qcGenes = false;
         boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
         boolean qcOrphanTerms = false;
@@ -89,9 +88,6 @@ public class QC {
                     break;
                 case "--annotations":
                     qcAnnotations = true;
-                    break;
-                case "--genes":
-                    qcGenes = true;
                     break;
                 case "--hgncId":
                     qcHgncIds = true;
@@ -139,10 +135,6 @@ public class QC {
 
         if( qcAlleles || qcAll ) {
             qcAlleles();
-        }
-
-        if( qcGenes || qcAll ) {
-            qcGenes();
         }
 
         if( qcHgncIds || qcAll ) {
@@ -240,93 +232,6 @@ public class QC {
             log.info("===");
             logDuplicateAlleles.info("===");
         }
-    }
-
-    void qcGenes() throws Exception {
-
-        log.info("");
-        log.info("GENE NAMES/SYMBOLS: removing ASCII characters > 127");
-
-        int totalNamesSanitized = 0;
-
-        for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
-            if( !SpeciesType.isSearchable(speciesTypeKey) ) {
-                continue;
-            }
-            String species = SpeciesType.getCommonName(speciesTypeKey);
-
-            int namesUpdated = 0;
-
-            List<IntStringMapQuery.MapPair> list = dao.getGeneNames(speciesTypeKey);
-            for( IntStringMapQuery.MapPair pair: list ) {
-                int rgdId = pair.keyValue;
-                String oldName = pair.stringValue;
-                if( oldName != null ) {
-                    String newName = sanitizeWhitespaceAndNBSP(oldName);
-                    if (!oldName.equals(newName)) {
-                        dao.updateGeneName(rgdId, oldName, newName);
-
-                        namesUpdated++;
-                        break;
-                    }
-                }
-            }
-
-            totalNamesSanitized += namesUpdated;
-
-            if( namesUpdated>0 ) {
-                log.info("   " + species + "  genes: " + list.size() + "  sanitized: " + namesUpdated);
-            }
-        }
-
-        log.info(" total gene names sanitized: " + totalNamesSanitized);
-
-
-        int totalSymbolsSanitized = 0;
-
-        for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
-            if( !SpeciesType.isSearchable(speciesTypeKey) ) {
-                continue;
-            }
-            String species = SpeciesType.getCommonName(speciesTypeKey);
-
-            int symbolsUpdated = 0;
-
-            List<IntStringMapQuery.MapPair> list = dao.getGeneSymbols(speciesTypeKey);
-            for( IntStringMapQuery.MapPair pair: list ) {
-                int rgdId = pair.keyValue;
-                String oldSymbol = pair.stringValue;
-
-                String newSymbol = sanitizeWhitespaceAndNBSP(oldSymbol);
-                if (!oldSymbol.equals(newSymbol)) {
-                    dao.updateGeneSymbol(rgdId, oldSymbol, newSymbol);
-
-                    symbolsUpdated++;
-                    break;
-                }
-            }
-
-            totalSymbolsSanitized += symbolsUpdated;
-
-            if( symbolsUpdated>0 ) {
-                log.info("   " + species + "  genes: " + list.size() + "  sanitized: " + symbolsUpdated);
-            }
-        }
-
-        log.info(" total gene symbols sanitized: " + totalSymbolsSanitized);
-    }
-
-    String sanitizeWhitespaceAndNBSP( String str ) {
-
-        String newStr = str;
-        for (int i = 0; i < str.length(); i++) {
-            if (str.codePointAt(i) > 127) {
-
-                newStr = str.replace( str.charAt(i), ' ').trim();
-                break;
-            }
-        }
-        return newStr;
     }
 
     void qcHgncIds() throws Exception {
@@ -459,7 +364,6 @@ public class QC {
 
     /**
      * RS ontology must have 'RGD ID:' synonyms properly formatted in order to be properly associated with a strain object
-     * @throws Exception
      */
     void qcRsOntology() throws Exception {
 
@@ -476,7 +380,6 @@ public class QC {
 
     /**
      * 'orphan-term' - active ontology term without parent terms and child terms
-     * @throws Exception
      */
     void qcOrphanTerms() throws Exception {
 
