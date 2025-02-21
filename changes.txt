@@ -1,3 +1,6 @@
+Feb 21, 2025
+  updated dependencies
+
 Mar 26, 2024
   removed checking for non-ASCII characters in gene names and symbols:
     non-ASCII characters are now forbidden in gene names and symbols via enforced Oracle constraints
