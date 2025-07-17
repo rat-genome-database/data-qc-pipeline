@@ -8,7 +8,7 @@ SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 
 INACTIVE_IDS_EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
-    INACTIVE_IDS_EMAIL_LIST=sjwang@mcw.edu,gthayman@mcw.edu,mtutaj@mcw.edu
+    INACTIVE_IDS_EMAIL_LIST="sjwang@mcw.edu mtutaj@mcw.edu"
 fi
 
 APPDIR=/home/rgddata/pipelines/$APPNAME

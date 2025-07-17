@@ -11,10 +11,10 @@ ALLELE_EMAIL_LIST=mtutaj@mcw.edu
 MMO_EMAIL_LIST=mtutaj@mcw.edu
 INACTIVE_IDS_EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
-    EMAIL_LIST=mtutaj@mcw.edu,slaulede@mcw.edu,jrsmith@mcw.edu
-    ALLELE_EMAIL_LIST=mtutaj@mcw.edu,sjwang@mcw.edu,jrsmith
-    MMO_EMAIL_LIST=mtutaj@mcw.edu,jrsmith@mcw.edu
-    INACTIVE_IDS_EMAIL_LIST=sjwang@mcw.edu,gthayman@mcw.edu,mtutaj@mcw.edu
+    EMAIL_LIST="mtutaj@mcw.edu slaulede@mcw.edu jrsmith@mcw.edu"
+    ALLELE_EMAIL_LIST="mtutaj@mcw.edu sjwang@mcw.edu jrsmith"
+    MMO_EMAIL_LIST="mtutaj@mcw.edu jrsmith@mcw.edu"
+    INACTIVE_IDS_EMAIL_LIST="sjwang@mcw.edu mtutaj@mcw.edu"
 fi
 
 APPDIR=/home/rgddata/pipelines/$APPNAME

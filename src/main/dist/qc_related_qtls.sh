@@ -9,7 +9,7 @@ SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 
 EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
-    EMAIL_LIST=jrsmith@mcw.edu,mtutaj@mcw.edu
+    EMAIL_LIST="jrsmith@mcw.edu mtutaj@mcw.edu"
 fi
 
 APPDIR=/home/rgddata/pipelines/$APPNAME
