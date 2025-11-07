@@ -57,9 +57,11 @@ public class DAO {
 
     public List<Alias> findAliases(int objectKey, int speciesTypeKey, String valueMask) throws Exception {
         String searchValue = "%"+valueMask.toLowerCase()+"%";
-        String sql = "SELECT * FROM aliases a,rgd_ids i WHERE alias_value_lc LIKE ? AND a.rgd_id=i.rgd_id AND i.object_key=? AND i.species_type_key=? AND object_status='ACTIVE'";
-        AliasQuery q = new AliasQuery(adao.getDataSource(), sql);
-        return aliasDAO.execute(q, searchValue, objectKey, speciesTypeKey);
+        String sql = """
+            SELECT * FROM aliases a,rgd_ids i
+            WHERE alias_value_lc LIKE ? AND a.rgd_id=i.rgd_id AND i.object_key=? AND i.species_type_key=? AND object_status='ACTIVE'";
+            """;
+        return AliasQuery.execute(aliasDAO, sql, searchValue, objectKey, speciesTypeKey);
     }
 
     public List<Annotation> getAnnotationsWithNewLinesInNotes() throws Exception {
@@ -108,13 +110,7 @@ public class DAO {
         String rootTermAcc = odao.getRootTerm(ontId);
 
         List<Annotation> annots = adao.getAnnotations(rootTermAcc);
-        Iterator<Annotation> it = annots.iterator();
-        while( it.hasNext() ) {
-            Annotation a = it.next();
-            if( !a.getEvidence().equals("ND") ) {
-                it.remove();
-            }
-        }
+        annots.removeIf(a -> !a.getEvidence().equals("ND"));
         return annots;
     }
 
@@ -218,9 +214,12 @@ public class DAO {
     }
 
     public List<IntStringMapQuery.MapPair> getActiveQtlsWithInactiveMarkers() throws Exception {
-        String sql = "SELECT q.rgd_id,q.qtl_symbol FROM qtls q\n" +
-                "WHERE EXISTS(select 1 FROM rgd_ids r where (r.rgd_id=q.peak_rgd_id or r.rgd_id=flank_1_rgd_id or r.rgd_id=flank_2_rgd_id) and r.object_status<>'ACTIVE') \n" +
-                "  AND EXISTS(select 1 from rgd_ids i where i.rgd_id=q.rgd_id and i.object_status='ACTIVE')";
+        String sql = """
+            SELECT q.rgd_id,q.qtl_symbol FROM qtls q
+            WHERE EXISTS(select 1 FROM rgd_ids r where (r.rgd_id=q.peak_rgd_id or r.rgd_id=flank_1_rgd_id or r.rgd_id=flank_2_rgd_id)
+                         and r.object_status<>'ACTIVE')
+              AND EXISTS(select 1 from rgd_ids i where i.rgd_id=q.rgd_id and i.object_status='ACTIVE')
+            """;
         return IntStringMapQuery.execute(adao, sql);
     }
 
@@ -250,20 +249,24 @@ public class DAO {
     }
 
     public List<String> getDuplicateHgncIds() throws Exception {
-        String sql = "SELECT x1.acc_id||'  RGD:'||x1.rgd_id||', RGD:'||x2.rgd_id ids\n" +
-            "FROM rgd_acc_xdb x1,rgd_acc_xdb x2,rgd_ids i1,rgd_ids i2\n" +
-            "WHERE x1.xdb_key=21 and x2.xdb_key=21 and x1.acc_id=x2.acc_id and x1.rgd_id<x2.rgd_id\n" +
-            "  AND i1.rgd_id=x1.rgd_id and i1.object_key=1 and i1.object_status='ACTIVE'\n" +
-            "  AND i2.rgd_id=x2.rgd_id and i2.object_key=1 and i2.object_status='ACTIVE'";
+        String sql = """
+            SELECT x1.acc_id||'  RGD:'||x1.rgd_id||', RGD:'||x2.rgd_id ids
+            FROM rgd_acc_xdb x1,rgd_acc_xdb x2,rgd_ids i1,rgd_ids i2
+            WHERE x1.xdb_key=21 and x2.xdb_key=21 and x1.acc_id=x2.acc_id and x1.rgd_id<x2.rgd_id
+              AND i1.rgd_id=x1.rgd_id and i1.object_key=1 and i1.object_status='ACTIVE'
+              AND i2.rgd_id=x2.rgd_id and i2.object_key=1 and i2.object_status='ACTIVE'
+            """;
         return StringListQuery.execute(adao, sql);
     }
 
     public List<IntStringMapQuery.MapPair> getNcbiTranscriptsWithoutXdbIds(int speciesTypeKey) throws Exception {
-        String sql = "SELECT gene_rgd_id,acc_id FROM transcripts t,rgd_ids i\n" +
-                "WHERE transcript_rgd_id=i.rgd_id AND i.object_status='ACTIVE' AND species_type_key=? AND acc_id NOT LIKE 'ENS%'\n" +
-                "MINUS\n" +
-                "SELECT x.rgd_id gene_rgd_id,acc_id FROM rgd_acc_xdb x,rgd_ids i\n" +
-                "WHERE x.rgd_id=i.rgd_id AND species_type_key=? AND xdb_key=1";
+        String sql = """
+            SELECT gene_rgd_id,acc_id FROM transcripts t,rgd_ids i
+            WHERE transcript_rgd_id=i.rgd_id AND i.object_status='ACTIVE' AND species_type_key=? AND acc_id NOT LIKE 'ENS%'
+            MINUS
+            SELECT x.rgd_id gene_rgd_id,acc_id FROM rgd_acc_xdb x,rgd_ids i
+            WHERE x.rgd_id=i.rgd_id AND species_type_key=? AND xdb_key=1
+            """;
         return IntStringMapQuery.execute(adao, sql, speciesTypeKey, speciesTypeKey);
     }
 
@@ -277,11 +280,13 @@ public class DAO {
     }
 
     public List<GenomicElement []> getGeneAllelesWithSameSymbols() throws Exception {
-        String sql = "SELECT g1.rgd_id i1,g2.rgd_id i2,g1.gene_symbol s1,g2.gene_symbol s2,g1.full_name f1,g2.full_name f2\n"+
-                "FROM genes g1,genes g2,rgd_ids i1,rgd_ids i2\n" +
-                "WHERE g1.gene_symbol=g2.gene_symbol AND g1.rgd_id<g2.rgd_id AND i1.species_type_key=i2.species_type_key\n" +
-                "  AND g1.rgd_id=i1.rgd_id AND i1.object_status='ACTIVE' AND g1.gene_type_lc IN('allele','variant')\n" +
-                "  AND g2.rgd_id=i2.rgd_id AND i2.object_status='ACTIVE' AND g2.gene_type_lc IN('allele','variant')\n";
+        String sql = """
+            SELECT g1.rgd_id i1,g2.rgd_id i2,g1.gene_symbol s1,g2.gene_symbol s2,g1.full_name f1,g2.full_name f2
+            FROM genes g1,genes g2,rgd_ids i1,rgd_ids i2
+            WHERE g1.gene_symbol=g2.gene_symbol AND g1.rgd_id<g2.rgd_id AND i1.species_type_key=i2.species_type_key
+              AND g1.rgd_id=i1.rgd_id AND i1.object_status='ACTIVE' AND g1.gene_type_lc IN('allele','variant')
+              AND g2.rgd_id=i2.rgd_id AND i2.object_status='ACTIVE' AND g2.gene_type_lc IN('allele','variant')
+            """;
 
         List<GenomicElement[]> result = new ArrayList<>();
 
@@ -305,11 +310,13 @@ public class DAO {
     }
 
     public List<GenomicElement []> getGeneAllelesWithSameNames() throws Exception {
-        String sql = "SELECT g1.rgd_id i1,g2.rgd_id i2,g1.gene_symbol s1,g2.gene_symbol s2,g1.full_name f1,g2.full_name f2\n"+
-                "FROM genes g1,genes g2,rgd_ids i1,rgd_ids i2\n" +
-                "WHERE g1.full_name=g2.full_name AND g1.rgd_id<g2.rgd_id AND i1.species_type_key=i2.species_type_key\n" +
-                "  AND g1.rgd_id=i1.rgd_id AND i1.object_status='ACTIVE' AND g1.gene_type_lc IN('allele','variant')\n" +
-                "  AND g2.rgd_id=i2.rgd_id AND i2.object_status='ACTIVE' AND g2.gene_type_lc IN('allele','variant')\n";
+        String sql = """
+            SELECT g1.rgd_id i1,g2.rgd_id i2,g1.gene_symbol s1,g2.gene_symbol s2,g1.full_name f1,g2.full_name f2
+            FROM genes g1,genes g2,rgd_ids i1,rgd_ids i2
+            WHERE g1.full_name=g2.full_name AND g1.rgd_id<g2.rgd_id AND i1.species_type_key=i2.species_type_key
+              AND g1.rgd_id=i1.rgd_id AND i1.object_status='ACTIVE' AND g1.gene_type_lc IN('allele','variant')
+              AND g2.rgd_id=i2.rgd_id AND i2.object_status='ACTIVE' AND g2.gene_type_lc IN('allele','variant')
+            """;
 
         List<GenomicElement[]> result = new ArrayList<>();
 
@@ -333,11 +340,13 @@ public class DAO {
     }
 
     public List<String> getVariantsWithSameNames() throws Exception {
-        String sql = "SELECT 'NAME: ['||v1.name||'] RGD ID1='||v1.rgd_id||', RGD ID2='||v2.rgd_id \n" +
-                "FROM variants v1,variants v2,rgd_ids i1,rgd_ids i2 \n" +
-                "WHERE v1.rgd_id<v2.rgd_id AND v1.name=v2.name \n" +
-                "  AND i1.rgd_id=v1.rgd_id AND i2.rgd_id=v2.rgd_id\n" +
-                "  AND i1.object_status='ACTIVE' AND i2.object_status='ACTIVE'";
+        String sql = """
+            SELECT 'NAME: ['||v1.name||'] RGD ID1='||v1.rgd_id||', RGD ID2='||v2.rgd_id
+            FROM variants v1,variants v2,rgd_ids i1,rgd_ids i2
+            WHERE v1.rgd_id<v2.rgd_id AND v1.name=v2.name
+              AND i1.rgd_id=v1.rgd_id AND i2.rgd_id=v2.rgd_id
+              AND i1.object_status='ACTIVE' AND i2.object_status='ACTIVE'
+            """;
 
         return StringListQuery.execute(strainDAO, sql);
     }
@@ -352,8 +361,10 @@ public class DAO {
 
     public List<Gene> getGenesByType(String geneType) throws Exception {
 
-        String query = "SELECT g.*, i.species_type_key FROM genes g, rgd_ids i " +
-                "WHERE g.rgd_id=i.rgd_id AND gene_type_lc=LOWER(?)";
+        String query = """
+            SELECT g.*, i.species_type_key FROM genes g, rgd_ids i
+            WHERE g.rgd_id=i.rgd_id AND gene_type_lc=LOWER(?)
+            """;
 
         return GeneQuery.execute(geneDAO, query, geneType);
     }
