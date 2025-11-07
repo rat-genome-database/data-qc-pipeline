@@ -59,7 +59,7 @@ public class DAO {
         String searchValue = "%"+valueMask.toLowerCase()+"%";
         String sql = """
             SELECT * FROM aliases a,rgd_ids i
-            WHERE alias_value_lc LIKE ? AND a.rgd_id=i.rgd_id AND i.object_key=? AND i.species_type_key=? AND object_status='ACTIVE'";
+            WHERE alias_value_lc LIKE ? AND a.rgd_id=i.rgd_id AND i.object_key=? AND i.species_type_key=? AND object_status='ACTIVE'
             """;
         return AliasQuery.execute(aliasDAO, sql, searchValue, objectKey, speciesTypeKey);
     }
@@ -203,9 +203,11 @@ public class DAO {
     }
 
     public List<Annotation> getAnnotationsWithInactiveReferences() throws Exception {
-        String sql = "SELECT a.*,r.species_type_key FROM full_annot a,rgd_ids r"+
-            " WHERE annotated_object_rgd_id=rgd_id AND object_status='ACTIVE'"+
-            "  AND EXISTS (SELECT 1 FROM rgd_ids r WHERE ref_rgd_id=rgd_id AND object_status<>'ACTIVE')";
+        String sql = """
+            SELECT a.*,r.species_type_key FROM full_annot a,rgd_ids r
+             WHERE annotated_object_rgd_id=rgd_id AND object_status='ACTIVE'
+              AND EXISTS (SELECT 1 FROM rgd_ids r WHERE ref_rgd_id=rgd_id AND object_status<>'ACTIVE')
+            """;
         return adao.executeAnnotationQuery(sql);
     }
 
