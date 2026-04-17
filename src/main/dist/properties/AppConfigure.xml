@@ -2,6 +2,6 @@
 
 <beans>
     <bean id="manager" class="edu.mcw.rgd.QC">
-        <property name="version" value="data-qc-pipeline   -- build Feb 04, 2026" />
+        <property name="version" value="data-qc-pipeline   -- build Apr 17, 2026" />
     </bean>
 </beans>

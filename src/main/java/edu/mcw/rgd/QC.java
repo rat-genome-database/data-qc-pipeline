@@ -5,6 +5,7 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
+import edu.mcw.rgd.process.MemoryMonitor;
 import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,6 +50,9 @@ public class QC {
     public void run(String[] args) throws Exception {
 
         long time0 = System.currentTimeMillis();
+
+        MemoryMonitor memoryMonitor = new MemoryMonitor();
+        memoryMonitor.start();
 
         log.info(getVersion());
         log.info("   "+dao.getConnectionInfo());
@@ -176,7 +180,10 @@ public class QC {
         if( qcVariants || qcAll ) {
             qcVariants();
         }
-        log.info("=== OK -- elapsed time "+ Utils.formatElapsedTime(time0, System.currentTimeMillis()));
+        memoryMonitor.stop();
+        log.info(memoryMonitor.getSummary());
+
+        log.info("=== OK -- elapsed time "+ Utils.formatElapsedTime(time0, System.currentTimeMillis())+"\n");
     }
 
     void qcAlleles() throws Exception {
