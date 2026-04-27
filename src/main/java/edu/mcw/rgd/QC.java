@@ -54,6 +54,9 @@ public class QC {
         MemoryMonitor memoryMonitor = new MemoryMonitor();
         memoryMonitor.start();
 
+        boolean ok = false;
+        try {
+
         log.info(getVersion());
         log.info("   "+dao.getConnectionInfo());
 
@@ -180,10 +183,13 @@ public class QC {
         if( qcVariants || qcAll ) {
             qcVariants();
         }
-        memoryMonitor.stop();
-        log.info(memoryMonitor.getSummary());
 
-        log.info("=== OK -- elapsed time "+ Utils.formatElapsedTime(time0, System.currentTimeMillis())+"\n");
+        ok = true;
+        } finally {
+            memoryMonitor.stop();
+            log.info(memoryMonitor.getSummary());
+            log.info((ok ? "=== OK -- " : "=== FAILED -- ") + "elapsed time "+ Utils.formatElapsedTime(time0, System.currentTimeMillis())+"\n");
+        }
     }
 
     void qcAlleles() throws Exception {
