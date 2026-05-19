@@ -119,49 +119,23 @@ public class DAO {
         Set<String> manualEvidenceCodes = getManualEvidenceCodes();
 
         List<Annotation> annots = adao.getAnnotationsByAspect(rgdId, aspect);
-        Iterator<Annotation> it = annots.iterator();
-        while( it.hasNext() ) {
-            Annotation a = it.next();
-            if( !manualEvidenceCodes.contains(a.getEvidence()) ) {
-                it.remove();
-                continue;
-            }
-            if( !a.getDataSrc().equals("RGD") ) {
-                it.remove();
-            }
-        }
+        annots.removeIf(a -> !manualEvidenceCodes.contains(a.getEvidence()) || !a.getDataSrc().equals("RGD"));
         return annots;
     }
 
     public List<Annotation> getRgdManualAnnotationsWithMmoNotes(int speciesTypeKey) throws Exception {
 
         List<Annotation> annots = adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, "C", "RGD");
-        Iterator<Annotation> it = annots.iterator();
-
-        while (it.hasNext()) {
-            Annotation a = it.next();
-
+        annots.removeIf(a ->
             // handle only GENES
-            if (a.getRgdObjectKey() != RgdId.OBJECT_KEY_GENES) {
-                it.remove();
-                continue;
-            }
+            a.getRgdObjectKey() != RgdId.OBJECT_KEY_GENES
             // process only original annotations - WITH_INFO must be NULL
-            if (a.getWithInfo() != null) {
-                it.remove();
-                continue;
-            }
+            || a.getWithInfo() != null
             // allowed evidence codes: IDA, IMP, IPI
-            if (!(a.getEvidence().equals("IDA") || a.getEvidence().equals("IMP") || a.getEvidence().equals("IPI"))) {
-                it.remove();
-                continue;
-            }
+            || !(a.getEvidence().equals("IDA") || a.getEvidence().equals("IMP") || a.getEvidence().equals("IPI"))
             // skip annotations that do not have MMO ids in the notes
-            if (a.getNotes() == null || !a.getNotes().contains("MMO:")) {
-                it.remove();
-                continue;
-            }
-        }
+            || a.getNotes() == null || !a.getNotes().contains("MMO:")
+        );
         return annots;
     }
 

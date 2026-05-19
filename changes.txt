@@ -1,3 +1,6 @@
+May 19, 2026
+  removed unused commons-net dependency; DAO: collapsed Iterator.remove loops to removeIf; updated dependencies
+
 Apr 27, 2026
   bug fix: log memory summary and elapsed time on failure path; updated dependencies
 
