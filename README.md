@@ -21,6 +21,8 @@ General purpose qc reports on data integrity.
 3. ONTOLOGIES
     1. Synonyms for RS ontology that contain text 'RGD ID' are checked if the RGD ID is properly formatted
        (it must be exactly in the format: 'RGD ID: rgdid', where 'rgdid' is a numeric value)
+    2. Obsolete terms in CMO, MMO and XCO ontologies are labeled per widely used standards for ontology
+       development: the term name is prepended with 'obsolete ' and the term definition with 'OBSOLETE. '
 
 4. SEQUENCES
     1. show count of orphaned sequences: sequences from SEQ_DATA table not associated

@@ -150,10 +150,24 @@ public class DAO {
         return odao.getTermWithStatsCached(termAcc);
     }
 
+    public List<String> getObsoleteTerms(String ontId) throws Exception {
+        return odao.getObsoleteTerms(ontId);
+    }
+
+    public Term getTermByAccId(String termAcc) throws Exception {
+        return odao.getTermByAccId(termAcc);
+    }
+
+    public int updateTerm(Term term) throws Exception {
+        return odao.updateTerm(term);
+    }
+
     public List<String> getOrphanTerms(String ontId) throws Exception {
-        String sql = "SELECT term_acc FROM ont_terms t WHERE ont_id=? AND is_obsolete=0\n" +
-                "  AND NOT EXISTS(SELECT 1 FROM ont_dag d WHERE t.term_acc=parent_term_acc OR t.term_acc=child_term_acc)";
-        return StringListQuery.execute(odao, sql, ontId);
+        List<String> accIds = new ArrayList<>();
+        for( Term t: odao.getOrphanedTerms(ontId) ) {
+            accIds.add(t.getAccId());
+        }
+        return accIds;
     }
 
     /**

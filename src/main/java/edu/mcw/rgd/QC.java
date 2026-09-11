@@ -27,6 +27,7 @@ public class QC {
 
     Logger log = LogManager.getLogger("status");
     Logger logQtls = LogManager.getLogger("qtls_with_inactive_markers");
+    Logger logObsoleteTerms = LogManager.getLogger("obsolete_terms");
     Logger logOrphanTerms = LogManager.getLogger("orphan_terms");
     Logger logRelatedQtls = LogManager.getLogger("related_qtls");
     Logger logDuplicateAlleles = LogManager.getLogger("duplicate_alleles");
@@ -69,6 +70,7 @@ public class QC {
         boolean qcAnnotations = false;
         boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
+        boolean qcObsoleteTerms = false;
         boolean qcOrphanTerms = false;
         boolean qcRelatedQtls = false;
         boolean qcRrrcIds = false;
@@ -101,6 +103,9 @@ public class QC {
                     break;
                 case "--inactive_objects":
                     qcInactiveObjects = true;
+                    break;
+                case "--obsolete_terms":
+                    qcObsoleteTerms = true;
                     break;
                 case "--orphan_terms":
                     qcOrphanTerms = true;
@@ -150,6 +155,10 @@ public class QC {
 
         if( qcInactiveObjects || qcAll ) {
             qcActiveQtlsWithInactiveMarkers();
+        }
+
+        if( qcObsoleteTerms || qcAll ) {
+            qcObsoleteTerms();
         }
 
         if( qcOrphanTerms || qcAll ) {
@@ -387,6 +396,59 @@ public class QC {
             log.info("");
             for( TermSynonym ts: malformedRsSynonyms ) {
                 log.info("TERM_ACC:"+ts.getTermAcc()+"  SYN: ["+ts.getName()+"]");
+            }
+        }
+    }
+
+    /**
+     * to conform with widely used standards for ontology development, obsolete ontology terms must be labeled as such:
+     * the term name is prepended with 'obsolete ' and the term definition is prepended with 'OBSOLETE. '
+     */
+    void qcObsoleteTerms() throws Exception {
+
+        log.info("");
+        log.info("OBSOLETE TERMS:");
+        // currently only for ontologies maintained by RGD, per user request
+        String[] ontIds = {"CMO", "MMO", "XCO"};
+        for( String ontId: ontIds ) {
+
+            int termNamesUpdated = 0;
+            int definitionsUpdated = 0;
+
+            List<String> obsoleteTermAccs = dao.getObsoleteTerms(ontId);
+            for( String termAcc: obsoleteTermAccs ) {
+                Term term = dao.getTermByAccId(termAcc);
+                boolean changed = false;
+
+                String name = term.getTerm();
+                if( !Utils.isStringEmpty(name) && !name.toLowerCase().startsWith("obsolete") ) {
+                    logObsoleteTerms.debug(term.getAccId()+"  NAME OLD ["+name+"]");
+                    logObsoleteTerms.debug(term.getAccId()+"  NAME NEW [obsolete "+name+"]");
+                    term.setTerm("obsolete "+name);
+                    termNamesUpdated++;
+                    changed = true;
+                }
+
+                String definition = term.getDefinition();
+                if( !Utils.isStringEmpty(definition) && !definition.toUpperCase().startsWith("OBSOLETE") ) {
+                    logObsoleteTerms.debug(term.getAccId()+"  DEF OLD ["+definition+"]");
+                    logObsoleteTerms.debug(term.getAccId()+"  DEF NEW [OBSOLETE. "+definition+"]");
+                    term.setDefinition("OBSOLETE. "+definition);
+                    definitionsUpdated++;
+                    changed = true;
+                }
+
+                if( changed ) {
+                    dao.updateTerm(term);
+                }
+            }
+
+            String msg = "    "+ontId+": obsolete terms processed: "+obsoleteTermAccs.size()
+                    +";  term names prepended with 'obsolete ': "+termNamesUpdated
+                    +";  definitions prepended with 'OBSOLETE. ': "+definitionsUpdated;
+            log.info(msg);
+            if( termNamesUpdated!=0 || definitionsUpdated!=0 ) {
+                logObsoleteTerms.info(msg);
             }
         }
     }

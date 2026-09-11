@@ -1,3 +1,9 @@
+Sep 11, 2026
+  new module qcObsoleteTerms: obsolete CMO, MMO and XCO terms get the term name prepended with 'obsolete '
+    and the definition with 'OBSOLETE. '; summary of changes emailed to ONTOLOGY_EMAIL_LIST;
+    orphan terms report also emailed to ONTOLOGY_EMAIL_LIST; DAO reuses rgdcore getObsoleteTerms/getOrphanedTerms;
+    removed slaulede from email lists; updated dependencies
+
 May 19, 2026
   removed unused commons-net dependency; DAO: collapsed Iterator.remove loops to removeIf; updated dependencies
 

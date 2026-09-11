@@ -10,11 +10,13 @@ EMAIL_LIST=mtutaj@mcw.edu
 ALLELE_EMAIL_LIST=mtutaj@mcw.edu
 MMO_EMAIL_LIST=mtutaj@mcw.edu
 INACTIVE_IDS_EMAIL_LIST=mtutaj@mcw.edu
+ONTOLOGY_EMAIL_LIST=mtutaj@mcw.edu
 if [ "$SERVER" == "REED" ]; then
-    EMAIL_LIST="mtutaj@mcw.edu slaulede@mcw.edu jrsmith@mcw.edu"
+    EMAIL_LIST="mtutaj@mcw.edu jrsmith@mcw.edu"
     ALLELE_EMAIL_LIST="mtutaj@mcw.edu sjwang@mcw.edu jrsmith"
     MMO_EMAIL_LIST="mtutaj@mcw.edu jrsmith@mcw.edu"
     INACTIVE_IDS_EMAIL_LIST="sjwang@mcw.edu mtutaj@mcw.edu"
+    ONTOLOGY_EMAIL_LIST="mtutaj@mcw.edu jrsmith@mcw.edu cpark@mcw.edu"
 fi
 
 APPDIR=/home/rgddata/pipelines/$APPNAME
@@ -54,9 +56,14 @@ if [ -s logs/duplicate_variants_simple.log ]; then
   mailx -s "[$SERVER] duplicate variant names" $ALLELE_EMAIL_LIST < logs/duplicate_variants_simple.log
 fi
 
-# if there are gene alleles having the same symbols or names, email them
+# if any obsolete ontology terms had 'obsolete '/'OBSOLETE. ' labels prepended, email the summary of changes
+if [ -s logs/obsolete_terms_daily.log ]; then
+  mailx -s "[$SERVER] obsolete ontology terms labeled" $ONTOLOGY_EMAIL_LIST < logs/obsolete_terms_daily.log
+fi
+
+# if there are orphan ontology terms, email them
 if [ -s logs/orphan_terms_summary.log ]; then
-  mailx -s "[$SERVER] orphan terms" mtutaj@mcw.edu < logs/orphan_terms_summary.log
+  mailx -s "[$SERVER] orphan terms" $ONTOLOGY_EMAIL_LIST < logs/orphan_terms_summary.log
 fi
 
 if [ -s logs/rrrc_ids_summary.log ]; then
