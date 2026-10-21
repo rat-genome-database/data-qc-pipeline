@@ -66,7 +66,7 @@ public class DAO {
 
     public List<Annotation> getAnnotationsWithNewLinesInNotes() throws Exception {
 
-        String sql = "SELECT * FROM full_annot WHERE dbms_lob.instr(notes,CHR(10))>0";
+        String sql = "SELECT * FROM full_annot WHERE STRPOS(notes,CHR(10))>0";
         return adao.executeAnnotationQuery(sql);
     }
 
@@ -141,7 +141,7 @@ public class DAO {
 
     public List<TermSynonym> getMalformedRsSynonyms() throws Exception {
         String sql = "SELECT * FROM ont_synonyms WHERE term_acc LIKE 'RS%' AND synonym_name LIKE '%RGD%ID%'\n" +
-                " AND NOT regexp_like(synonym_name, '^RGD ID: [0-9]+$')";
+                " AND synonym_name !~ '^RGD ID: [0-9]+$'";
         TermSynonymQuery q = new TermSynonymQuery(odao.getDataSource(), sql);
         return odao.execute(q);
     }
@@ -240,7 +240,7 @@ public class DAO {
 
     public List<String> getDuplicateHgncIds() throws Exception {
         String sql = """
-            SELECT x1.acc_id||'  RGD:'||x1.rgd_id||', RGD:'||x2.rgd_id ids
+            SELECT CONCAT(x1.acc_id, '  RGD:', x1.rgd_id, ', RGD:', x2.rgd_id) ids
             FROM rgd_acc_xdb x1,rgd_acc_xdb x2,rgd_ids i1,rgd_ids i2
             WHERE x1.xdb_key=21 and x2.xdb_key=21 and x1.acc_id=x2.acc_id and x1.rgd_id<x2.rgd_id
               AND i1.rgd_id=x1.rgd_id and i1.object_key=1 and i1.object_status='ACTIVE'
@@ -253,7 +253,7 @@ public class DAO {
         String sql = """
             SELECT gene_rgd_id,acc_id FROM transcripts t,rgd_ids i
             WHERE transcript_rgd_id=i.rgd_id AND i.object_status='ACTIVE' AND species_type_key=? AND acc_id NOT LIKE 'ENS%'
-            MINUS
+            EXCEPT
             SELECT x.rgd_id gene_rgd_id,acc_id FROM rgd_acc_xdb x,rgd_ids i
             WHERE x.rgd_id=i.rgd_id AND species_type_key=? AND xdb_key=1
             """;
@@ -331,7 +331,7 @@ public class DAO {
 
     public List<String> getVariantsWithSameNames() throws Exception {
         String sql = """
-            SELECT 'NAME: ['||v1.name||'] RGD ID1='||v1.rgd_id||', RGD ID2='||v2.rgd_id
+            SELECT CONCAT('NAME: [', v1.name, '] RGD ID1=', v1.rgd_id, ', RGD ID2=', v2.rgd_id)
             FROM variants v1,variants v2,rgd_ids i1,rgd_ids i2
             WHERE v1.rgd_id<v2.rgd_id AND v1.name=v2.name
               AND i1.rgd_id=v1.rgd_id AND i2.rgd_id=v2.rgd_id

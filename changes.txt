@@ -1,3 +1,6 @@
+Oct 21, 2026
+  migrated to postgres; updated dependencies
+
 Sep 11, 2026
   new module qcObsoleteTerms: obsolete CMO, MMO and XCO terms get the term name prepended with 'obsolete '
     and the definition with 'OBSOLETE. '; summary of changes emailed to ONTOLOGY_EMAIL_LIST;
