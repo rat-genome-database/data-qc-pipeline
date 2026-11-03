@@ -162,6 +162,35 @@ public class DAO {
         return odao.updateTerm(term);
     }
 
+    /**
+     * @return terms, from all ontologies, with non-breaking spaces (U+00A0) in term names
+     */
+    public List<Term> getTermsWithNbspInNames() throws Exception {
+        String sql = "SELECT * FROM ont_terms WHERE INSTR(term, UNISTR('\\00A0'))>0";
+        return odao.executeTermQuery(sql);
+    }
+
+    /**
+     * @return synonyms, from all ontologies, with non-breaking spaces (U+00A0) in synonym names
+     */
+    public List<TermSynonym> getSynonymsWithNbspInNames() throws Exception {
+        String sql = "SELECT * FROM ont_synonyms WHERE INSTR(synonym_name, UNISTR('\\00A0'))>0";
+        TermSynonymQuery q = new TermSynonymQuery(odao.getDataSource(), sql);
+        return odao.execute(q);
+    }
+
+    public List<TermSynonym> getTermSynonyms(String termAcc) throws Exception {
+        return odao.getTermSynonyms(termAcc);
+    }
+
+    public int updateTermSynonym(TermSynonym syn) throws Exception {
+        return odao.updateTermSynonym(syn);
+    }
+
+    public int deleteTermSynonyms(Collection<TermSynonym> synonyms) throws Exception {
+        return odao.deleteTermSynonyms(synonyms);
+    }
+
     public List<String> getOrphanTerms(String ontId) throws Exception {
         List<String> accIds = new ArrayList<>();
         for( Term t: odao.getOrphanedTerms(ontId) ) {

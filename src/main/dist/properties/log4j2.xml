@@ -78,6 +78,17 @@
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
         </File>
 
+        <RollingFile name="nbsp_terms" append="true" fileName="logs/nbsp_terms.log" filePattern="logs/nbsp_terms.log.%d{yyyy-MM}">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+        </RollingFile>
+        <File name="nbsp_terms_daily" append="false" fileName="logs/nbsp_terms_daily.log">
+            <PatternLayout pattern="%m%n"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+
         <RollingFile name="qtls_with_inactive_markers" append="true" fileName="logs/qtls_with_inactive_markers.log" filePattern="logs/qtls_with_inactive_markers.log.%d{yyyy-MM}">
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
             <Policies>
@@ -194,6 +205,11 @@
         <Logger name="orphan_terms" level="debug" additivity="false">
             <AppenderRef ref="orphan_terms"/>
             <AppenderRef ref="orphan_terms_summary"/>
+            <AppenderRef ref="Console" level="info"/>
+        </Logger>
+        <Logger name="nbsp_terms" level="debug" additivity="false">
+            <AppenderRef ref="nbsp_terms"/>
+            <AppenderRef ref="nbsp_terms_daily"/>
             <AppenderRef ref="Console" level="info"/>
         </Logger>
         <Logger name="rrrc_ids" level="debug" additivity="false">
