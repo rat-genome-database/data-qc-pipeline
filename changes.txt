@@ -1,3 +1,7 @@
+Nov 03, 2026
+  new module --nbsp_terms: non-breaking spaces in term names and synonyms (all ontologies) replaced with regular spaces;
+    summary of changes emailed to ONTOLOGY_EMAIL_LIST
+
 Oct 21, 2026
   migrated to postgres; updated dependencies
 

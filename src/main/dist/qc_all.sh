@@ -61,6 +61,11 @@ if [ -s logs/obsolete_terms_daily.log ]; then
   mailx -s "[$SERVER] obsolete ontology terms labeled" $ONTOLOGY_EMAIL_LIST < logs/obsolete_terms_daily.log
 fi
 
+# if any term names or synonyms had non-breaking spaces replaced with regular spaces, email the summary of changes
+if [ -s logs/nbsp_terms_daily.log ]; then
+  mailx -s "[$SERVER] non-breaking spaces fixed in term names and synonyms" $ONTOLOGY_EMAIL_LIST < logs/nbsp_terms_daily.log
+fi
+
 # if there are orphan ontology terms, email them
 if [ -s logs/orphan_terms_summary.log ]; then
   mailx -s "[$SERVER] orphan terms" $ONTOLOGY_EMAIL_LIST < logs/orphan_terms_summary.log

@@ -23,6 +23,8 @@ General purpose qc reports on data integrity.
        (it must be exactly in the format: 'RGD ID: rgdid', where 'rgdid' is a numeric value)
     2. Obsolete terms in CMO, MMO and XCO ontologies are labeled per widely used standards for ontology
        development: the term name is prepended with 'obsolete ' and the term definition with 'OBSOLETE. '
+    3. Non-breaking spaces (U+00A0) in term names and synonyms, for all ontologies, are replaced with regular spaces;
+       they look like regular spaces, but break name matching (f.e. ClinVar conditions to RDO terms)
 
 4. SEQUENCES
     1. show count of orphaned sequences: sequences from SEQ_DATA table not associated

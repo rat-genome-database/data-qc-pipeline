@@ -29,6 +29,7 @@ public class QC {
     Logger logQtls = LogManager.getLogger("qtls_with_inactive_markers");
     Logger logObsoleteTerms = LogManager.getLogger("obsolete_terms");
     Logger logOrphanTerms = LogManager.getLogger("orphan_terms");
+    Logger logNbspTerms = LogManager.getLogger("nbsp_terms");
     Logger logRelatedQtls = LogManager.getLogger("related_qtls");
     Logger logDuplicateAlleles = LogManager.getLogger("duplicate_alleles");
     Logger logDuplicateVariants = LogManager.getLogger("duplicate_variants");
@@ -70,6 +71,7 @@ public class QC {
         boolean qcAnnotations = false;
         boolean qcHgncIds = false;
         boolean qcInactiveObjects = false;
+        boolean qcNbspTerms = false;
         boolean qcObsoleteTerms = false;
         boolean qcOrphanTerms = false;
         boolean qcRelatedQtls = false;
@@ -103,6 +105,9 @@ public class QC {
                     break;
                 case "--inactive_objects":
                     qcInactiveObjects = true;
+                    break;
+                case "--nbsp_terms":
+                    qcNbspTerms = true;
                     break;
                 case "--obsolete_terms":
                     qcObsoleteTerms = true;
@@ -155,6 +160,11 @@ public class QC {
 
         if( qcInactiveObjects || qcAll ) {
             qcActiveQtlsWithInactiveMarkers();
+        }
+
+        if( qcNbspTerms || qcAll ) {
+            qcNbspInTermNames();
+            qcNbspInSynonyms();
         }
 
         if( qcObsoleteTerms || qcAll ) {
@@ -451,6 +461,117 @@ public class QC {
                 logObsoleteTerms.info(msg);
             }
         }
+    }
+
+    /**
+     * non-breaking spaces (U+00A0) in term names, usually pasted from web pages or Word documents,
+     * look like regular spaces, but they break name matching (f.e. ClinVar conditions to RDO terms);
+     * every run of spaces containing a non-breaking space is replaced with a single regular space, for all ontologies
+     */
+    void qcNbspInTermNames() throws Exception {
+
+        log.info("");
+
+        List<Term> terms = dao.getTermsWithNbspInNames();
+        terms.sort(Comparator.comparing(Term::getAccId));
+
+        TreeMap<String, Integer> fixedCountsByOnt = new TreeMap<>();
+        for( Term term: terms ) {
+            String oldName = term.getTerm();
+            String newName = removeNbsp(oldName);
+
+            logNbspTerms.info(term.getAccId()+"  OLD ["+showNbsp(oldName)+"]");
+            logNbspTerms.info(term.getAccId()+"  NEW ["+newName+"]");
+
+            term.setTerm(newName);
+            dao.updateTerm(term);
+
+            fixedCountsByOnt.merge(term.getOntologyId(), 1, Integer::sum);
+        }
+
+        String msg = "TERM NAMES WITH NON-BREAKING SPACES, FIXED: "+terms.size();
+        log.info(msg);
+        if( !terms.isEmpty() ) {
+            logNbspTerms.info(msg);
+            for( String ontId: fixedCountsByOnt.keySet() ) {
+                msg = "    "+ontId+": "+fixedCountsByOnt.get(ontId);
+                log.info(msg);
+                logNbspTerms.info(msg);
+            }
+        }
+    }
+
+    /**
+     * same as qcNbspInTermNames(), but for synonym names;
+     * if the fixed synonym is already in RGD (same term, name, type and source), the synonym with non-breaking spaces is deleted
+     */
+    void qcNbspInSynonyms() throws Exception {
+
+        log.info("");
+
+        List<TermSynonym> synonyms = dao.getSynonymsWithNbspInNames();
+        synonyms.sort(Comparator.comparing(TermSynonym::getTermAcc).thenComparing(TermSynonym::getName));
+
+        TreeMap<String, Integer> fixedCountsByOnt = new TreeMap<>();
+        List<TermSynonym> duplicatesForDelete = new ArrayList<>();
+        for( TermSynonym syn: synonyms ) {
+            String oldName = syn.getName();
+            String newName = removeNbsp(oldName);
+
+            logNbspTerms.info(syn.getTermAcc()+"  SYN OLD ["+showNbsp(oldName)+"]  "+syn.getType()+"  "+syn.getSource());
+
+            boolean isDuplicate = false;
+            for( TermSynonym s: dao.getTermSynonyms(syn.getTermAcc()) ) {
+                if( s.getKey()!=syn.getKey() && s.getName().equals(newName)
+                        && Utils.stringsAreEqual(s.getType(), syn.getType()) && Utils.stringsAreEqual(s.getSource(), syn.getSource()) ) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if( isDuplicate ) {
+                logNbspTerms.info(syn.getTermAcc()+"  SYN DELETED, fixed name already in RGD ["+newName+"]");
+                duplicatesForDelete.add(syn);
+            } else {
+                logNbspTerms.info(syn.getTermAcc()+"  SYN NEW ["+newName+"]");
+                syn.setName(newName);
+                dao.updateTermSynonym(syn);
+            }
+
+            String ontId = syn.getTermAcc().substring(0, syn.getTermAcc().indexOf(':'));
+            fixedCountsByOnt.merge(ontId, 1, Integer::sum);
+        }
+        if( !duplicatesForDelete.isEmpty() ) {
+            dao.deleteTermSynonyms(duplicatesForDelete);
+        }
+
+        String msg = "SYNONYMS WITH NON-BREAKING SPACES, FIXED: "+synonyms.size();
+        if( !duplicatesForDelete.isEmpty() ) {
+            msg += "  (deleted as duplicates: "+duplicatesForDelete.size()+")";
+        }
+        log.info(msg);
+        if( !synonyms.isEmpty() ) {
+            logNbspTerms.info(msg);
+            for( String ontId: fixedCountsByOnt.keySet() ) {
+                msg = "    "+ontId+": "+fixedCountsByOnt.get(ontId);
+                log.info(msg);
+                logNbspTerms.info(msg);
+            }
+        }
+    }
+
+    /**
+     * replace every run of spaces containing a non-breaking space with a single regular space
+     */
+    String removeNbsp(String s) {
+        return s.replaceAll("[\\u00A0 ]*\\u00A0[\\u00A0 ]*", " ").trim();
+    }
+
+    /**
+     * make non-breaking spaces visible in the reports
+     */
+    String showNbsp(String s) {
+        return s.replace(String.valueOf((char)0xA0), "<NBSP>");
     }
 
     /**
